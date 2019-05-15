@@ -1,3 +1,7 @@
+# Isogenies VDF Paper
+
+https://eprint.iacr.org/2019/166.pdf
+
 # How to compute our VDF ?
 `sage vdf.py protocol method pSize` where:
 - `protocol` is `fp` or `fp2`,
