@@ -1,7 +1,7 @@
 # How to compute our VDF ?
 `sage vdf.py protocol method pSize` where:
 - `protocol` is `fp` or `fp2`,
-- `method` is `kernel4` or `kernel4k`
+- `method` is `kernel4` or `kernel4k`,
 - `pSize` is `p14-toy`, `p89-toy` or `p1506`.
 
 # Issues.
