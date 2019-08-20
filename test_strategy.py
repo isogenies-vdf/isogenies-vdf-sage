@@ -1,10 +1,11 @@
- -*- coding: utf-8 -*-
+-*- coding: utf-8 -*-
 import time
 from sage.all import *
 
 # We implement the optimal strategy when computing the isogeny walk
 # Current status:
 #  * OK for toy sage implem
+#  * nOK for our code implem (not even tried)
 
 from collections import deque
 
@@ -120,4 +121,48 @@ strategy = [6,3,2,1,2,1,3,1,1,2,1]
 assert naive_strat(E, S, [P]) == iter_strat(12*2, E, S, [P], strategy)
 assert naive_strat(E, S, [P])[0] == E.isogeny_codomain(S)
 print 'test is OK for a toy curve :-)'
+
+##########################################################
+
+#conversion to Montgomery
+alpha = E.division_polynomial(2).roots()[0][0]
+s = 1/sqrt(Fp(3*alpha**2 + E.a4()))
+
+# Montgomery curve
+print 'c = curve.Curve(3**' + str(m) + ', ' + str(n) + ', 1, ' + str(3*alpha*s) + ', 1, 0)'
+for R in [S, P] :
+    print 'point.Point(' + str(s*(R[0]-alpha)) +  ', ' + str(s*R[1]) +  ', c)'
+
+"""Not done
+import curve
+c = curve.Curve(3**13, 12, 1, 3455529096, 1, 0)
+# change Delta for vdf use
+
+import point
+u = c.Fp2.gen()
+print c.weierstrass()
+S = point.Point(744273114*u + 774175590, 1, c)
+P = point.Point(6358632301*u + 829780589, 1, c)
+
+print S.weierstrass()
+print S.weierstrass().order().factor()
+# naive strategy
+def naive_strat(E, S, list_of_points) :
+    curve = E
+    list1 = copy(list_of_points)
+    R = S
+    while R!=0 :
+        Q = R
+        while not(Q.is_order(4)) :
+            Q = 4*Q
+        list2 = Q.isogeny_degree4([R] + list1)
+        R = list2[0]
+        list1 = list2[1:]
+        Q = R
+        curve = Q.curve
+        print curve
+    return [curve, list1]
+
+print naive_strat(curve, S, [P])
+"""
 
