@@ -17,7 +17,7 @@ phi(Q) - frob(phi(Q)) because maybe there is a problem of sign on y. I find
 the right one checking if the coordinates lie in Fp.
 - Ate pairing is not efficent for one of the pairings in the Fp2 case (we need 
 to compute the denominators...).
-- Optimal strategy for computing a [4^k]-isogeny is not done ![#f03c15]ON WORK![#f03c15].
+- Optimal strategy for computing a [4^k]-isogeny is not done `ON WORK`.
 - One pairing on the verify step can be done before the answer of vdf_eval.
 - Do I really need all the a-coefficients of the steps in the output of setup ?
 When I compute the evaluation step, I need to switch to the right isomorphic 
