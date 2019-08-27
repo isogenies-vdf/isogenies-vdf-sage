@@ -85,66 +85,39 @@ def iter_strat(e2, E, S, list_of_points, strat) :
             return false
     return [F, list1]
 
-# TEST OF CONVERSION BETWEEN WEIERSTRASS AND MONTGOMERY
-def montgomery(P, alpha, s) :
-    '''
-    INPUT:
-        * the point on the weierstrass model
-        * alpha for the conversion (wiki)
-        * s for the conversion (wiki)
-    OUTPUT:
-        * the point on the montgomery model
-    '''
-    x = P[0]/P[2]
-    return [s*(x-alpha), 1]
+# test
+P = (3**m)*E.random_point()
+while P.order() != 2**n :
+    P = (3**m)*E.random_point()
 
-import curve
-alpha = E.division_polynomial(2).roots()[0][0]
-s = 1/sqrt(Fp(3*alpha**2 + E.a4()))
-c = curve.Curve(3**m, n, 1, Integers()(3*alpha*s), 1, 0)
-# change Delta for vdf use
+S = (2**4) * P
+assert S.order() == 2**8
 
-a = E.a4()
-b = E.a6()
-A = c.a
-B = s
+list = [E.random_point() for i in [1,2,3]]
 
-P = E.random_point()
-P43 = (4**3) * P
-xP43 = c.Fp2(P43[0].polynomial().list())
+#optimal symmetric strategy
+#  /\
+# /  \
+#/\  /\
+strat = [2, 1, 1]
+assert naive_strat(E, S, list) == recur_strat(E, S, list, strat)
+assert naive_strat(E, S, list) == iter_strat(8, E, S, list, strat)
 
-import point
-Pmong = point.Point(montgomery(P, alpha, s)[0], 1, c)
-P43mong = (4**3)*Pmong
-P43mongx = c.Fp2((P43mong.x).polynomial().list())
-assert P43mong.weierstrass()[0]/B == xP43
+#naive peigne strategy
+#  /\
+# / /\
+#/ / /\
+strat = [3,2,1]
+assert naive_strat(E, S, list) == recur_strat(E, S, list, strat)
+assert naive_strat(E, S, list) == iter_strat(8, E, S, list, strat)
 
-# TEST OF VALIDITY OF isogeny_degree4 AND isogeny_degree4k
-# très galère de gérer les corps finis...
-def changeIsomorphicCurve(P, E2) :
-    from sage.schemes.elliptic_curves.weierstrass_morphism import WeierstrassIsomorphism
-    C1 = P.curve()
-    a1,b1 = C1.a4(), C1.a6()
-    Fp2 = C1.base_ring()
-    C2 = EllipticCurve(Fp2, [Fp2(E2.a4().polynomial().list()), Fp2(E2.a6().polynomial().list())])
-    iso = WeierstrassIsomorphism(E=C1, F=C2)
-    return iso(P)
+# We now choose fixed point and want to have the same computation with
+# our code (Curve, Point, etc.)
+S = E(6386625696*u + 3074559785, 3328803575*u + 3521453575)
+assert S.order() == 2**n
+P = E(4429946037*u + 1171750011, 4367999821*u + 5023911199)
 
-P = E(2691078013*u + 5411211369, 5875184984*u + 3991903998)
-Pmong = point.Point(montgomery(P, alpha, s)[0], 1, c)
-
-# TEST FOR isogeny_degree4
-S4 = E(5212767203*u + 1541898534, 1982433626*u + 2069840204)
-S4mong = point.Point(montgomery(S4, alpha, s)[0], 1, c)
-ListImage = S4mong.isogeny_degree4([Pmong])
-ImagePmong = ListImage[0]
-print changeIsomorphicCurve(ImagePmong.weierstrass(), E.isogeny_codomain(S4))
-print E.isogeny(S4)(P)
-
-# TEST FOR isogeny_degree4k
-S = E(2527535319*u + 1865797195, 5803316480*u + 321180210)
-Smong = point.Point(montgomery(S, alpha, s)[0], 1, c)
-[phiPmong, phiP4kmong, listofcurves] = Smong.isogeny_degree4k(Pmong, 4, 'kernel4')
-print E.isogeny(S)(P)
-print changeIsomorphicCurve(phiPmong.weierstrass(), E.isogeny_codomain(S))
-
+strategy = [6,3,2,1,2,1,3,1,1,2,1]
+assert naive_strat(E, S, [P]) == iter_strat(12*2, E, S, [P], strategy)
+assert naive_strat(E, S, [P])[0] == E.isogeny_codomain(S)
+print 'test is OK for a toy curve :-)'
