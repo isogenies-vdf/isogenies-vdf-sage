@@ -49,11 +49,12 @@ class Point:
         if z == 0 :
             return self.curve.weierstrass()([0,1,0])
         xn = x/z
-        if ((xn)**3 + self.curve.a*(xn)**2 + xn).is_square() :
-            return self.curve.weierstrass()(xn + self.curve.a/3, sqrt((xn)**3 + self.curve.a*(xn)**2 + xn))
-        else :
+        # sage does not like finite fiels
+        xn = self.curve.Fp2(xn.polynomial().list())
+        if not((xn**3+self.curve.a*xn**2 + xn).is_square()) :
             print 'point on the twist'
-            return self.curve.weierstrass()(xn + self.curve.a/3, sqrt((xn)**3 + self.curve.a*(xn)**2 + xn))
+        x_w = xn + self.curve.a/3
+        return self.curve.weierstrass().lift_x(x_w)
     
     def equals(self, Q) :
         return self.x == Q.x and self.z == Q.z
@@ -68,6 +69,11 @@ class Point:
         #eprint 2017/212 algo 2
         x = self.x
         z = self.z
+        # sage does not like finite fields...
+        if not(x in Integers()) :
+            x = self.curve.Fp2(x.polynomial().list())
+        if not(z in Integers()) :
+            z = self.curve.Fp2(z.polynomial().list())
         v1 = x+z
         v1 = v1**2
         v2 = x-z
@@ -90,6 +96,21 @@ class Point:
         xP, zP = self.x, self.z
         xQ, zQ = Q.x, Q.z
         xm, zm = PmQ.x, PmQ.z
+
+        # sage does not like finite fields...
+        if not(xP in Integers()) :
+            xP = self.curve.Fp2(xP.polynomial().list())
+        if not(zP in Integers()) :
+            zP = self.curve.Fp2(zP.polynomial().list())
+        if not(xP in Integers()) :
+            xQ = self.curve.Fp2(xQ.polynomial().list())
+        if not(zQ in Integers()) :
+            zQ = self.curve.Fp2(zQ.polynomial().list())
+        if not(xm in Integers()) :
+            xm = self.curve.Fp2(xm.polynomial().list())
+        if not(zm in Integers()) :
+            zm = self.curve.Fp2(zm.polynomial().list())
+
         v0 = xP + zP
         v1 = xQ - zQ
         v1 = v1 * v0
@@ -174,12 +195,19 @@ class Point:
         list_images = []
         
         XP4 = self.normalize().x
+        # sage does not like finite fields
+        XP4 = self.curve.Fp2(XP4.polynomial().list())
         if XP4 != 1 and XP4 != -1 :
             aprime = 4*XP4**4 - 2
             curve_prime = copy(self.curve)
             curve_prime.a = aprime
             for R in Points :
                 X, Z = R.x, R.z
+                # sage does not like finite fields
+                if not(X in Integers()) :
+                    X = R.curve.Fp2(X.polynomial().list())
+                if not(Z in Integers()) :
+                    Z = R.curve.Fp2(Z.polynomial().list())
                 if Z != 0 :
                     X = X/Z
                     phiP_Xprime = -(X*XP4**2 + X -2*XP4) * X * (X*XP4 - 1)**2
@@ -194,6 +222,11 @@ class Point:
             curve_prime.a = aprime
             for R in Points :
                 X, Z = R.x, R.z
+                # sage does not like finite fields
+                if not(X in Integers()) :
+                    X = R.curve.Fp2(X.polynomial().list())
+                if not(Z in Integers()) :
+                    Z = R.curve.Fp2(Z.polynomial().list())
                 phiP_Xprime = (X+Z)**2 * (self.curve.a*X*Z + X**2 + Z**2)
                 phiP_Zprime = (2-self.curve.a) * X * Z * (X-Z)**2
                 list_images.append(Point(phiP_Xprime, phiP_Zprime, curve_prime))
@@ -243,24 +276,20 @@ class Point:
         curve_target.a = a
         return Point(iso(P_ws)[0], 1, curve_target)
     
-    def isogeny_degree4k(self, Q, k, method, stop=0) :
+    def isogeny_degree4k_strategy(self, Q, k, method, strategy, stop=0) :
         '''
         INPUT:
         * self the point defining the kernel of the isogeny, of degree 4**k
         * Q a point that we want to evaluate
         * k such that the isogeny is of degree 4**k
         * method a string defining the method to use : withKernel4, withKernel4k or withoutKernel
+        * strategy a list of integers representing the stragegy for browsing the tree
         OUTPUT:
         * phiQ the image of Q
         * phiQ4k a point generating the dual isogeny kernel   (if method = 'kernel4k')
         * listOfCurves the list of 4-isogenous curvesq        (if method = 'kernel4')
         REMARKS:
         * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
-        * Implementation is the naive one:
-            /\
-           / /\       (first possibility on DFJP 506.pdf figure 4)
-          / / /\
-         / / / /\
         '''
         l = k
         phiP4k = self
@@ -273,21 +302,40 @@ class Point:
             Q4k = self.dual_kernel_point(k)
             #evaluate Q4k give the kernel of the dual isogeny
             image_points += [Q4k]
-            
-        cpt = k
-        while l > stop :
-            P4 = image_points[1].get_P4(l)
-            #verbose for large computations
-            if (l*10)//k < cpt and ZZ(self.curve.p).nbits() > 100 :
-                cpt = (l*10)//k
-                print (10 - cpt)*10, '%  of the isogeny'
-            image_points = P4.isogeny_degree4(image_points)
-            if method == 'kernel4' :
-                listOfCurves_a.append(image_points[0].curve)
-            l = l-1
+        Queue1 = deque()
+        Queue1.append([k, self])
+        i = 0
+        F = self.curve
+        list1 = copy(image_points)
+        while len(Queue1) != 0 :
+            [h, P] = Queue1.pop()
+            if h == 1 :
+                Queue2 = deque()
+                while len(Queue1) != 0 :
+                    [h, Q] = Queue1.popleft()
+                    Q = P.isogeny_degree4([Q])[0]
+                    Queue2.append([h-1, Q])
+                Queue1 = Queue2
+                list1 = P.isogeny_degree4(list1)
+                F = list1[0].curve
+                if method == 'kernel4' :
+                    listOfCurves_a.append(F)
+            elif strategy[i] > 0 and strategy[i] < h :
+                Queue1.append([h, P])
+                P = 4**(strategy[i]) * P
+                Queue1.append([h-strategy[i], P])
+                i += 1
+            else :
+                return false
+        return [F, list1]
+
         
+        #take care of the stop stuff
+        # list 1 is not all the images...
+        #TODOTODOTODOTODO
+
         #output
-        phiQ = image_points[0]
+        phiQ = list1[0]
         
         if method == 'kernel4k' :
             # the point defining the dual is the 3rd one of image_points evaluated by the 4-isogenies
@@ -299,3 +347,4 @@ class Point:
             listOfCurves_a = ''
         
         return [phiQ, phiQ4k, listOfCurves_a]
+
