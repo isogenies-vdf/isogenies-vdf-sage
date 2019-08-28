@@ -1,18 +1,43 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 from sage.all import *
 import curve
+from collections import deque
+from sage.schemes.elliptic_curves.weierstrass_morphism import WeierstrassIsomorphism
 
 class Point:
     def __init__(self, x, z, c):
         self.x = x
         self.z = z
         self.curve = c
-        
+
     def __str__(self):
         return '[' + str(self.x) + ', ' + str(self.z) + ']'
 
     def __repr__(self):
         return '[' + repr(self.x) + ', ' +  repr(self.z) + ']'
+
+    def compareXWithWeierstrass(self, other) :
+        field = self.curve.Fp2
+        selfW = self.weierstrass()
+        if selfW.curve() != other.curve() :
+            # we are in an isomorphic curve
+            # let's move to the right one
+            a1, b1 = selfW.curve().a4(), selfW.curve().a6()
+            C2 = EllipticCurve(field, [field(other.curve().a4().polynomial().list()), field(other.curve().a6().polynomial().list())])
+            iso = WeierstrassIsomorphism(E=selfW.curve(), F=C2)
+            selfW = iso(selfW)
+        x = field(selfW[0].polynomial().list())
+        z = field(selfW[2].polynomial().list())
+        X = field(other[0].polynomial().list())
+        Z = field(other[2].polynomial().list())
+
+        #alpha = other.curve().division_polynomial(2).roots()[0][0]
+        #print 'alpha=', alpha
+        #s = 1/sqrt(field(3*alpha**2 + other.curve().a4()))
+        #print x* Z
+        #print s*z*X
+        #print -s*z*X
+        return x * Z == z * X
 
     def normalize(self) :
         '''
@@ -20,7 +45,7 @@ class Point:
 
         OUTPUT:
         * [x/z, 1] the normalized point representing P
-        '''    
+        '''
         if self.z == 0 :
             return Point(1, 0, self.curve)
         return Point(self.x/self.z, 1, self.curve)
@@ -55,10 +80,10 @@ class Point:
             print 'point on the twist'
         x_w = xn + self.curve.a/3
         return self.curve.weierstrass().lift_x(x_w)
-    
+
     def equals(self, Q) :
         return self.x == Q.x and self.z == Q.z
-    
+
     def dbl(self) :
         '''
         INPUT:
@@ -148,7 +173,7 @@ class Point:
         if R0.z == 0 :
             return Point(1, 0, self.curve)
         return R0
-    
+
     def is_order(self, k) :
         if ZZ(k).is_prime() :
             return (k*self).z == 0 and self.z != 0
@@ -164,7 +189,7 @@ class Point:
             l = valuation(k,4)
             return ((4**l) * self).z == 0 and (((4**l)//2) * self).z != 0
         return "not implemented"
-    
+
     def get_P4(self, k) :
         '''
         INPUT:
@@ -193,7 +218,7 @@ class Point:
         '''
         #assert isOrder4k(1, P4, a)
         list_images = []
-        
+
         XP4 = self.normalize().x
         # sage does not like finite fields
         XP4 = self.curve.Fp2(XP4.polynomial().list())
@@ -231,7 +256,7 @@ class Point:
                 phiP_Zprime = (2-self.curve.a) * X * Z * (X-Z)**2
                 list_images.append(Point(phiP_Xprime, phiP_Zprime, curve_prime))
         return list_images
-    
+
     def dual_kernel_point(self, k) :
         '''
         INPUT:
@@ -242,7 +267,6 @@ class Point:
         REMARK:
         * See p.23 (Alice’s validation of Bob’s public key.) of https://eprint.iacr.org/2016/413.pdf for details
         '''
-        
         P4 = self.get_P4(k)
         P2 = 2*P4
         Q_subgroup = False
@@ -253,7 +277,7 @@ class Point:
             Q_subgroup = (P2.x * Q2.z != Q2.x * P2.z and P2.x * Q2.z != - Q2.x * P2.z)
             #condition equivalent to ePQ**(4**k) == 1 and ePQ**((4**k)//2) != 1
         return Q4k
-    
+
     def change_iso_curve(self, a) :
         """
         INPUT:
@@ -275,7 +299,7 @@ class Point:
         curve_target = copy(self.curve)
         curve_target.a = a
         return Point(iso(P_ws)[0], 1, curve_target)
-    
+
     def isogeny_degree4k_strategy(self, Q, k, method, strategy, stop=0) :
         '''
         INPUT:
@@ -295,9 +319,9 @@ class Point:
         phiP4k = self
         curve_prime = copy(self.curve)
         image_points = [Q] + [self]
-        
+
         listOfCurves_a = []
-        
+
         if method == 'kernel4k':
             Q4k = self.dual_kernel_point(k)
             #evaluate Q4k give the kernel of the dual isogeny
@@ -307,19 +331,20 @@ class Point:
         i = 0
         F = self.curve
         list1 = copy(image_points)
-        while len(Queue1) != 0 :
+        while len(Queue1) != 0 and l > stop :
             [h, P] = Queue1.pop()
             if h == 1 :
                 Queue2 = deque()
                 while len(Queue1) != 0 :
                     [h, Q] = Queue1.popleft()
-                    Q = P.isogeny_degree4([Q])[0]
+                    [Q] = P.isogeny_degree4([Q])
                     Queue2.append([h-1, Q])
                 Queue1 = Queue2
                 list1 = P.isogeny_degree4(list1)
                 F = list1[0].curve
                 if method == 'kernel4' :
                     listOfCurves_a.append(F)
+                l -=  1
             elif strategy[i] > 0 and strategy[i] < h :
                 Queue1.append([h, P])
                 P = 4**(strategy[i]) * P
@@ -327,24 +352,15 @@ class Point:
                 i += 1
             else :
                 return false
-        return [F, list1]
-
-        
-        #take care of the stop stuff
-        # list 1 is not all the images...
-        #TODOTODOTODOTODO
-
         #output
         phiQ = list1[0]
-        
+
         if method == 'kernel4k' :
             # the point defining the dual is the 3rd one of image_points evaluated by the 4-isogenies
-            phiQ4k = image_points[2]
+            phiQ4k = list1[2]
         else :
             phiQ4k = ''
-        
+
         if method != 'kernel4' :
             listOfCurves_a = ''
-        
         return [phiQ, phiQ4k, listOfCurves_a]
-
