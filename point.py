@@ -38,6 +38,9 @@ class Point:
         Z = field(other[2].polynomial().list())
         return x * Z == z * X
 
+    def __eq__(self,other) :
+        return self.x * other.z == self.z * other.x
+
     def normalize(self) :
         '''
         INPUT:
@@ -332,4 +335,61 @@ class Point:
 
         if method != 'kernel4' :
             listOfCurves_a = ''
+        return [phiQ, phiQ4k, listOfCurves_a]
+
+    def isogeny_degree4k(self, Q, k, method, stop=0) :
+        '''
+        INPUT:
+        * self the point defining the kernel of the isogeny, of degree 4**k
+        * Q a point that we want to evaluate
+        * k such that the isogeny is of degree 4**k
+        * method a string defining the method to use : withKernel4, withKernel4k or withoutKernel
+        OUTPUT:
+        * phiQ the image of Q
+        * phiQ4k a point generating the dual isogeny kernel   (if method = 'kernel4k')
+        * listOfCurves the list of 4-isogenous curvesq        (if method = 'kernel4')
+        REMARKS:
+        * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
+        * Implementation is the naive one:
+            /\
+           / /\       (first possibility on DFJP 506.pdf figure 4)
+          / / /\
+         / / / /\
+        '''
+        l = k
+        phiP4k = self
+        curve_prime = copy(self.curve)
+        image_points = [Q] + [self]
+        
+        listOfCurves_a = []
+        
+        if method == 'kernel4k':
+            Q4k = self.dual_kernel_point(k)
+            #evaluate Q4k give the kernel of the dual isogeny
+            image_points += [Q4k]
+            
+        cpt = k
+        while l > stop :
+            P4 = image_points[1].get_P4(l)
+            #verbose for large computations
+            if (l*10)//k < cpt and ZZ(self.curve.p).nbits() > 100 :
+                cpt = (l*10)//k
+                print (10 - cpt)*10, '%  of the isogeny'
+            image_points = P4.isogeny_degree4(image_points)
+            if method == 'kernel4' :
+                listOfCurves_a.append(image_points[0].curve)
+            l = l-1
+        
+        #output
+        phiQ = image_points[0]
+        
+        if method == 'kernel4k' :
+            # the point defining the dual is the 3rd one of image_points evaluated by the 4-isogenies
+            phiQ4k = image_points[2]
+        else :
+            phiQ4k = ''
+        
+        if method != 'kernel4' :
+            listOfCurves_a = ''
+        
         return [phiQ, phiQ4k, listOfCurves_a]
