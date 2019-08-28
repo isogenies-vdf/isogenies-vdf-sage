@@ -4,10 +4,7 @@ from sage.all import *
 import curve
 import point
 
-# We implement the optimal strategy when computing the isogeny walk
-# Current status:
-#  * OK for toy sage implem
-#  * nOK for our code implem (not even tried)
+# We implement the optimal strategy when computing the isogeny walk for a toy curve
 
 n = 12
 m = 13
