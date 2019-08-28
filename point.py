@@ -17,6 +17,12 @@ class Point:
         return '[' + repr(self.x) + ', ' +  repr(self.z) + ']'
 
     def compareXWithWeierstrass(self, other) :
+        '''
+        INPUT:
+        * other a point of an elliptic curve of SageMath object EllipticCurve
+        OUTPUT:
+        * True of False if self corresponds to a point on a Weierstrass curve with the same x-coordinate as other
+        '''
         field = self.curve.Fp2
         selfW = self.weierstrass()
         if selfW.curve() != other.curve() :
