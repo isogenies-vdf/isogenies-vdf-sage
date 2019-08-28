@@ -36,13 +36,6 @@ class Point:
         z = field(selfW[2].polynomial().list())
         X = field(other[0].polynomial().list())
         Z = field(other[2].polynomial().list())
-
-        #alpha = other.curve().division_polynomial(2).roots()[0][0]
-        #print 'alpha=', alpha
-        #s = 1/sqrt(field(3*alpha**2 + other.curve().a4()))
-        #print x* Z
-        #print s*z*X
-        #print -s*z*X
         return x * Z == z * X
 
     def normalize(self) :
@@ -81,7 +74,8 @@ class Point:
             return self.curve.weierstrass()([0,1,0])
         xn = x/z
         # sage does not like finite fiels
-        xn = self.curve.Fp2(xn.polynomial().list())
+        if not(xn in Integers()) :
+            xn = self.curve.Fp2(xn.polynomial().list())
         if not((xn**3+self.curve.a*xn**2 + xn).is_square()) :
             print 'point on the twist'
         x_w = xn + self.curve.a/3
@@ -100,11 +94,6 @@ class Point:
         #eprint 2017/212 algo 2
         x = self.x
         z = self.z
-        # sage does not like finite fields...
-        if not(x in Integers()) :
-            x = self.curve.Fp2(x.polynomial().list())
-        if not(z in Integers()) :
-            z = self.curve.Fp2(z.polynomial().list())
         v1 = x+z
         v1 = v1**2
         v2 = x-z
@@ -127,21 +116,6 @@ class Point:
         xP, zP = self.x, self.z
         xQ, zQ = Q.x, Q.z
         xm, zm = PmQ.x, PmQ.z
-
-        # sage does not like finite fields...
-        if not(xP in Integers()) :
-            xP = self.curve.Fp2(xP.polynomial().list())
-        if not(zP in Integers()) :
-            zP = self.curve.Fp2(zP.polynomial().list())
-        if not(xP in Integers()) :
-            xQ = self.curve.Fp2(xQ.polynomial().list())
-        if not(zQ in Integers()) :
-            zQ = self.curve.Fp2(zQ.polynomial().list())
-        if not(xm in Integers()) :
-            xm = self.curve.Fp2(xm.polynomial().list())
-        if not(zm in Integers()) :
-            zm = self.curve.Fp2(zm.polynomial().list())
-
         v0 = xP + zP
         v1 = xQ - zQ
         v1 = v1 * v0
@@ -226,19 +200,12 @@ class Point:
         list_images = []
 
         XP4 = self.normalize().x
-        # sage does not like finite fields
-        XP4 = self.curve.Fp2(XP4.polynomial().list())
         if XP4 != 1 and XP4 != -1 :
             aprime = 4*XP4**4 - 2
             curve_prime = copy(self.curve)
             curve_prime.a = aprime
             for R in Points :
                 X, Z = R.x, R.z
-                # sage does not like finite fields
-                if not(X in Integers()) :
-                    X = R.curve.Fp2(X.polynomial().list())
-                if not(Z in Integers()) :
-                    Z = R.curve.Fp2(Z.polynomial().list())
                 if Z != 0 :
                     X = X/Z
                     phiP_Xprime = -(X*XP4**2 + X -2*XP4) * X * (X*XP4 - 1)**2
@@ -253,11 +220,6 @@ class Point:
             curve_prime.a = aprime
             for R in Points :
                 X, Z = R.x, R.z
-                # sage does not like finite fields
-                if not(X in Integers()) :
-                    X = R.curve.Fp2(X.polynomial().list())
-                if not(Z in Integers()) :
-                    Z = R.curve.Fp2(Z.polynomial().list())
                 phiP_Xprime = (X+Z)**2 * (self.curve.a*X*Z + X**2 + Z**2)
                 phiP_Zprime = (2-self.curve.a) * X * Z * (X-Z)**2
                 list_images.append(Point(phiP_Xprime, phiP_Zprime, curve_prime))
@@ -321,6 +283,7 @@ class Point:
         REMARKS:
         * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
         '''
+
         l = k
         phiP4k = self
         curve_prime = copy(self.curve)
