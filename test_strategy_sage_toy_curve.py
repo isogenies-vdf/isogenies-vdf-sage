@@ -2,10 +2,7 @@
 import time
 from sage.all import *
 
-# We implement the optimal strategy when computing the isogeny walk
-# Current status:
-#  * OK for toy sage implem
-#  * nOK for our code implem (not even tried)
+# We implement the optimal strategy on EllipticCurve object
 
 from collections import deque
 

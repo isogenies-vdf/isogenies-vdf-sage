@@ -73,7 +73,7 @@ def strategy(n, p, q):
 
 S = E(2527535319*u + 1865797195, 5803316480*u + 321180210)
 Smg = point.Point(montgomery(S, alpha, s)[0], 1, c)
-[phiPmg, phiP4kmg, listofcurves] = Smg.isogeny_degree4k_strategy(Pmg, 4, 'withoutKernel', strategy(4-1, 1, 1))
+[phiPmg, phiP4kmg, listofcurves] = Smg.isogeny_degree4k_strategy(Pmg, 4, 'withoutKernel', point.Point.strategy(4-1, 1, 1))
 assert phiPmg.compareXWithWeierstrass(E.isogeny(S)(P))
 
 S46 = (3**13)*E.random_point()
@@ -84,6 +84,5 @@ P = E.random_point()
 S46mg = point.Point(montgomery(S46, alpha, s)[0], 1, c)
 Pmg = point.Point(montgomery(P, alpha, s)[0], 1, c)
 
-[phiPmg, phiP4kmg, listofcurves] = S46mg.isogeny_degree4k_strategy(Pmg, 6, 'kernel4', strategy(6-1, 1, 1))
-print strategy(5,1,1)
+[phiPmg, phiP4kmg, listofcurves] = S46mg.isogeny_degree4k_strategy(Pmg, 6, 'kernel4', point.Point.strategy(6-1, 1, 1))
 assert phiPmg.compareXWithWeierstrass(E.isogeny(S46)(P))
