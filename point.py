@@ -265,6 +265,7 @@ class Point:
         E_a = EllipticCurve(self.curve.Fp2, [0,a,0,1,0])
         xP = self.x/self.z
         yP = sqrt(xP**3+a1*xP**2 + xP)
+
         P_ws = E_a1(xP, yP)
         iso = E_a1.isomorphism_to(E_a)
         curve_target = copy(self.curve)
@@ -300,6 +301,10 @@ class Point:
             image_points += [Q4k]
         Queue1 = deque()
         Queue1.append([k, self])
+
+        PRINTCOUNTER = 0
+        DEC = 0
+
         i = 0
         F = self.curve
         list1 = copy(image_points)
@@ -313,6 +318,10 @@ class Point:
                     Queue2.append([h-1, Q])
                 Queue1 = Queue2
                 list1 = P.isogeny_degree4(list1)
+                PRINTCOUNTER+=1
+                if n(100*PRINTCOUNTER/k) > DEC :
+                    DEC += 10
+                    print floor(100*PRINTCOUNTER/k), '% of the bigstep'
                 F = list1[0].curve
                 if method == 'kernel4' :
                     listOfCurves_a.append(F)
@@ -393,3 +402,24 @@ class Point:
             listOfCurves_a = ''
         
         return [phiQ, phiQ4k, listOfCurves_a]
+
+    @staticmethod
+    def strategy(n, p, q):
+        '''
+        INPUT:
+        * n the height of the tree
+        * p the cost of one multiplication step
+        * q the cost of one isogeny step
+        OUTPUT:
+        * a list corresponding to a strategy
+        REMARK:
+        from Luca De Feo's answer on crypto.stackexchange.com
+        '''
+        S = { 1: [] }
+        C = { 1: 0 }
+        for i in range(2, n+2):
+            b, cost = min(((b, C[i-b] + C[b] + b*p + (i-b)*q) for b in range(1,i)), key=lambda t: t[1])
+            S[i] = [b] + S[i-b] + S[b]
+            C[i] = cost
+        return S[n+1]
+    
