@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- 
 from sage.all import *
+from point import Point
 
 def isogeny_walk(curve, P, verbose, method) :
     '''
@@ -15,21 +16,21 @@ def isogeny_walk(curve, P, verbose, method) :
     REMARK:
     * We do not walk to the j=0,1728 curve at first step!
     '''
-    
+
     # Delta = n * q
     # q isogenies of degree 2^n=4^(n//2)
     q = curve.Delta // curve.n
     if curve.Delta % curve.n != 0 :
         print 'Delta is not a multiple of n'
         return False
-    
+
     #we do 4-isogenies and not 2-isogenies
     k = ZZ(curve.n//2)
-    
+
     ev_P = P
     curvesPath = []
     kernelsOfBigSteps = []
-    
+
     curve_prime = copy(curve)
     first = True
     for i in range(q) :
@@ -56,7 +57,7 @@ def isogeny_walk(curve, P, verbose, method) :
                 P4k = curve_prime.point_order(4**k, 2)
                 P4 = P4k.get_P4(k)
                 xP4 = P4.normalize().x
-        [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k(ev_P, k, method)
+        [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k_strategy(ev_P, k, method, strategy=Point.strategy(k-1, 1, 1))
         kernelsOfBigSteps += [kernelDual]
         curvesPath += listOfCurves
         curve_prime = ev_P.curve

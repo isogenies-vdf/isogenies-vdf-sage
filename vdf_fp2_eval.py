@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 from sage.all import *
-import point
+from point import Point
 import curve
 
 def vdf_eval(c, setup, Q, verbose, method):
@@ -21,29 +21,26 @@ def vdf_eval(c, setup, Q, verbose, method):
     k = ZZ(c.n//2)
     
     T = Q
-    c_t = copy(c_prime)
-    
+    # At the moment, isogeny codomain is "up to isomorphism".
+    # From the kernels given in setup, I need to move them into the right curve.
+    # That is why `kernel4` is not efficient (change_iso_curve times the number
+    # of steps in the walk on the graph. In kernel4k, it is reduced by a factor
+    # 1000 .
     if method == 'kernel4k' :
         for R in kernelsOfBigSteps :
-            R = R.change_iso_curve(c_t.a)
-            [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel')
-            c_t = T.curve
+            R = R.change_iso_curve(T.curve.a)
+            [T, kernelPoint, listOfCurves] = R.isogeny_degree4k_strategy(T, k, method='withoutKernel', strategy=Point.strategy(k-1, 1, 1))
     elif method == 'kernel4' :
         for c1 in curvesPath:
-            R = point.Point(1, 1, c1).change_iso_curve(c_t.a)
+            R = Point(1, 1, c1).change_iso_curve(T.curve.a)
             [T] = R.isogeny_degree4([T])
-            c_t = T.curve
 
     T = T.change_iso_curve(c.a)
     #T = hatphi(Q)
-    
-    #assert montgomery_ladder(N, T, a)[1] == 0
-    
+
     #Trace trick
-    frob_T = point.Point(T.x**c.p, T.z**c.p, T.curve)
-    
-    #assert montgomery_ladder(N, frob_T, a)[1] == 0
-        
+    frob_T = Point(T.x**c.p, T.z**c.p, T.curve)
+
     #not efficient
     fQ_ws = frob_T.weierstrass()
     Q_ws = T.weierstrass()
@@ -53,4 +50,3 @@ def vdf_eval(c, setup, Q, verbose, method):
     
     #the (+/-) point to return is the one defined over Fp :-)
     return c.getPointFromWeierstrass(R1) if R1[0] in c.Fp and R1[1] in c.Fp else c.getPointFromWeierstrass(R2)
-    #return [c.getPointFromWeierstrass(R1), c.getPointFromWeierstrass(R2)]
