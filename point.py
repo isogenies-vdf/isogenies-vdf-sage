@@ -196,10 +196,9 @@ class Point:
         * list_images the list of the images of the points to evaluate
         REMARKS:
         * Case with  x-coordinate != ±1 from SIDH-spec.pdf
-        * Case with x-coordinate = ±1 from Barreto et al. paper
+        * Case with x-coordinate = ±1 from eprint 2016/413
         (does not work for curves j=0,1728)
         '''
-        #assert isOrder4k(1, P4, a)
         list_images = []
 
         XP4 = self.normalize().x

@@ -32,8 +32,10 @@ def montgomery(P, alpha, s) :
         * the point on the montgomery model
     '''
     x = P[0]/P[2]
-    return [s*(x-alpha), 1]
+    return point.Point(s*(x-alpha), 1, curve.Curve(3**m, n, 1, Integers()(3*alpha*s), 1, 0)
+)
 
+'''
 P = E.random_point()
 P43 = (4**3) * P
 
@@ -52,37 +54,49 @@ S4mg = point.Point(montgomery(S4, alpha, s)[0], 1, c)
 assert ImagePmg.compareXWithWeierstrass(E.isogeny(S4)(P))
 
 # TEST FOR isogeny_degree4k_strategy
-def strategy(n, p, q):
-    '''
-    INPUT:
-    * n the height of the tree
-    * p the cost of one multiplication step
-    * q the cost of one isogeny step
-    OUTPUT:
-    * a list corresponding to a strategy
-    REMARK:
-    from Luca De Feo's answer on crypto.stackexchange.com
-    '''
-    S = { 1: [] }
-    C = { 1: 0 }
-    for i in range(2, n+2):
-        b, cost = min(((b, C[i-b] + C[b] + b*p + (i-b)*q) for b in range(1,i)), key=lambda t: t[1])
-        S[i] = [b] + S[i-b] + S[b]
-        C[i] = cost
-    return S[n+1]
-
 S = E(2527535319*u + 1865797195, 5803316480*u + 321180210)
 Smg = point.Point(montgomery(S, alpha, s)[0], 1, c)
 [phiPmg, phiP4kmg, listofcurves] = Smg.isogeny_degree4k_strategy(Pmg, 4, 'withoutKernel', point.Point.strategy(4-1, 1, 1))
 assert phiPmg.compareXWithWeierstrass(E.isogeny(S)(P))
 
+
+print 'fail occurs now\n\n\n'
+'''
+
 S46 = (3**13)*E.random_point()
 while S46.order() != 2**12 :
     S46 = (3**13)*E.random_point()
 P = E.random_point()
+S46=E(1717376048*u + 974237002, 423299931*u + 4631504878)
+assert S46.order() == 4**6
 
-S46mg = point.Point(montgomery(S46, alpha, s)[0], 1, c)
-Pmg = point.Point(montgomery(P, alpha, s)[0], 1, c)
+kernelfirst = (4**5)*S46
+phifirst = E.isogeny(kernelfirst)
+print 'first step arrive to ', phifirst.codomain().j_invariant()
 
-[phiPmg, phiP4kmg, listofcurves] = S46mg.isogeny_degree4k_strategy(Pmg, 6, 'kernel4', point.Point.strategy(6-1, 1, 1))
-assert phiPmg.compareXWithWeierstrass(E.isogeny(S46)(P))
+EEE = E
+SSS = S46
+for i in range(11) :
+    kernel = (2**(11-i))*SSS
+    assert kernel.order() == 2
+    ph1 = EEE.isogeny(kernel)
+    EEE = ph1.codomain()
+    #print 'jinv =', EEE.j_invariant()
+    SSS = ph1(SSS)
+
+S46mg = point.Point(montgomery(S46, alpha, s).x, 1, c)
+Pmg = point.Point(montgomery(P, alpha, s).x, 1, c)
+
+kernelfirstmg = (4**5) * S46mg
+print 'issuekernel = ', kernelfirstmg.normalize()
+assert kernelfirstmg == montgomery(kernelfirst, alpha, s)
+
+[A] = kernelfirstmg.isogeny_degree4([Pmg])
+print A.curve.weierstrass().j_invariant()
+
+
+#[phiPmg, phiP4kmg, listofcurves] = S46mg.isogeny_degree4k_strategy(Pmg, 6, 'kernel4', point.Point.strategy(6-1, 1, 1))
+#print 'phiP=', phiPmg
+#print 'P=', Pmg
+
+#assert phiPmg.compareXWithWeierstrass(E.isogeny(S46)(P))
