@@ -4,7 +4,8 @@ from sage.all import *
 import curve
 import point
 
-# We implement the optimal strategy when computing the isogeny walk for a toy curve
+# We compute a 4-isogeny on both objects : EllipticCurve from sage.all, and Curve, Points from our code.
+# The codomain of the isogeny is not the same with the two implementations (kernel point has x = -1)
 
 n = 12
 m = 13
@@ -19,9 +20,14 @@ E = EllipticCurve(Fp2, [a,b]); assert E.is_supersingular()
 alpha = E.division_polynomial(2).roots()[0][0]
 s = 1/sqrt(Fp(3*alpha**2 + E.a4()))
 c = curve.Curve(3**m, n, 1, Integers()(3*alpha*s), 1, 0)
-# change Delta for vdf use
 
-# TEST OF CONVERSION BETWEEN WEIERSTRASS AND MONTGOMERY
+# COMPUTATION ON THE ELLIPTICCURVE SAGE OBJECT
+P = E.random_point()
+S = E(4403911356, 2265545646) # S.order() == 4
+phi = E.isogeny(S)
+print 'Isogeny computation on Sage EllipticCurve obejct gives an isogeny to a curve with j-invariant j =', phi.codomain().j_invariant()
+
+# COMPUTATION ON THE CURVE AND POINT OBJECTS
 def montgomery(P, alpha, s) :
     '''
     INPUT:
@@ -34,11 +40,6 @@ def montgomery(P, alpha, s) :
     x = P[0]/P[2]
     return point.Point(s*(x-alpha), 1, curve.Curve(3**m, n, 1, Integers()(3*alpha*s), 1, 0)
 )
-
-P = E.random_point()
-S = E(4403911356, 2265545646) # S.order() == 4
-phi = E.isogeny(S)
-print 'Isogeny computation on Sage EllipticCurve obejct gives an isogeny to a curve with j-invariant j =', phi.codomain().j_invariant()
 
 Pmg = point.Point(montgomery(P, alpha, s).x, 1, c)
 Smg = montgomery(S, alpha, s)
