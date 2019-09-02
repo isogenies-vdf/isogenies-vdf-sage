@@ -6,13 +6,13 @@ proof.arithmetic(False)
 class Curve:
     def __init__(self, f, n, N, a, ext, Delta):
         self.f = f
-        self.n = n	 
+        self.n = n
         self.N = N
         self.p = 2**n*N*f - 1
         self.Fp = GF(self.p)
         self.Fpx = self.Fp['x']; x = self.Fpx.gen()
         self.Fp2 = self.Fp.extension(x**2+ext, 'u')
-        self.a = self.Fp2(a) 
+        self.a = self.Fp2(a)
         self.Delta = Delta
         self.cof_P = (self.p+1)//self.N
 
@@ -44,7 +44,7 @@ class Curve:
         * E the elliptic curve in Weierstrass model (y^2 = x^3+a*x+b)
         '''
         return EllipticCurve(self.Fp2, [1-(self.a**2)/3, self.a*(2*(self.a**2)/9-1)/3])
-    
+
     def point_order(self, k, extension_field = 2, twist = False) :
         if k == 2**(valuation(k,2)) :
             l = valuation(k,2)

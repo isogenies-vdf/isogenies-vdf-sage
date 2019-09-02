@@ -1,18 +1,45 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 from sage.all import *
 import curve
+from collections import deque
+from sage.schemes.elliptic_curves.weierstrass_morphism import WeierstrassIsomorphism
 
 class Point:
     def __init__(self, x, z, c):
         self.x = x
         self.z = z
         self.curve = c
-        
+
     def __str__(self):
         return '[' + str(self.x) + ', ' + str(self.z) + ']'
 
     def __repr__(self):
         return '[' + repr(self.x) + ', ' +  repr(self.z) + ']'
+
+    def compareXWithWeierstrass(self, other) :
+        '''
+        INPUT:
+        * other a point of an elliptic curve of SageMath object EllipticCurve
+        OUTPUT:
+        * True of False if self corresponds to a point on a Weierstrass curve with the same x-coordinate as other
+        '''
+        field = self.curve.Fp2
+        selfW = self.weierstrass()
+        if selfW.curve() != other.curve() :
+            # we are in an isomorphic curve
+            # let's move to the right one
+            a1, b1 = selfW.curve().a4(), selfW.curve().a6()
+            C2 = EllipticCurve(field, [field(other.curve().a4().polynomial().list()), field(other.curve().a6().polynomial().list())])
+            iso = WeierstrassIsomorphism(E=selfW.curve(), F=C2)
+            selfW = iso(selfW)
+        x = field(selfW[0].polynomial().list())
+        z = field(selfW[2].polynomial().list())
+        X = field(other[0].polynomial().list())
+        Z = field(other[2].polynomial().list())
+        return x * Z == z * X
+
+    def __eq__(self,other) :
+        return self.x * other.z == self.z * other.x
 
     def normalize(self) :
         '''
@@ -20,7 +47,7 @@ class Point:
 
         OUTPUT:
         * [x/z, 1] the normalized point representing P
-        '''    
+        '''
         if self.z == 0 :
             return Point(1, 0, self.curve)
         return Point(self.x/self.z, 1, self.curve)
@@ -49,15 +76,17 @@ class Point:
         if z == 0 :
             return self.curve.weierstrass()([0,1,0])
         xn = x/z
-        if ((xn)**3 + self.curve.a*(xn)**2 + xn).is_square() :
-            return self.curve.weierstrass()(xn + self.curve.a/3, sqrt((xn)**3 + self.curve.a*(xn)**2 + xn))
-        else :
+        # sage does not like finite fiels
+        if not(xn in Integers()) :
+            xn = self.curve.Fp2(xn.polynomial().list())
+        if not((xn**3+self.curve.a*xn**2 + xn).is_square()) :
             print 'point on the twist'
-            return self.curve.weierstrass()(xn + self.curve.a/3, sqrt((xn)**3 + self.curve.a*(xn)**2 + xn))
-    
+        x_w = xn + self.curve.a/3
+        return self.curve.weierstrass().lift_x(x_w)
+
     def equals(self, Q) :
         return self.x == Q.x and self.z == Q.z
-    
+
     def dbl(self) :
         '''
         INPUT:
@@ -127,7 +156,7 @@ class Point:
         if R0.z == 0 :
             return Point(1, 0, self.curve)
         return R0
-    
+
     def is_order(self, k) :
         if ZZ(k).is_prime() :
             return (k*self).z == 0 and self.z != 0
@@ -143,7 +172,7 @@ class Point:
             l = valuation(k,4)
             return ((4**l) * self).z == 0 and (((4**l)//2) * self).z != 0
         return "not implemented"
-    
+
     def get_P4(self, k) :
         '''
         INPUT:
@@ -167,12 +196,11 @@ class Point:
         * list_images the list of the images of the points to evaluate
         REMARKS:
         * Case with  x-coordinate != ±1 from SIDH-spec.pdf
-        * Case with x-coordinate = ±1 from Barreto et al. paper
+        * Case with x-coordinate = ±1 from eprint 2016/413
         (does not work for curves j=0,1728)
         '''
-        #assert isOrder4k(1, P4, a)
         list_images = []
-        
+
         XP4 = self.normalize().x
         if XP4 != 1 and XP4 != -1 :
             aprime = 4*XP4**4 - 2
@@ -198,7 +226,7 @@ class Point:
                 phiP_Zprime = (2-self.curve.a) * X * Z * (X-Z)**2
                 list_images.append(Point(phiP_Xprime, phiP_Zprime, curve_prime))
         return list_images
-    
+
     def dual_kernel_point(self, k) :
         '''
         INPUT:
@@ -209,7 +237,6 @@ class Point:
         REMARK:
         * See p.23 (Alice’s validation of Bob’s public key.) of https://eprint.iacr.org/2016/413.pdf for details
         '''
-        
         P4 = self.get_P4(k)
         P2 = 2*P4
         Q_subgroup = False
@@ -220,7 +247,7 @@ class Point:
             Q_subgroup = (P2.x * Q2.z != Q2.x * P2.z and P2.x * Q2.z != - Q2.x * P2.z)
             #condition equivalent to ePQ**(4**k) == 1 and ePQ**((4**k)//2) != 1
         return Q4k
-    
+
     def change_iso_curve(self, a) :
         """
         INPUT:
@@ -237,12 +264,87 @@ class Point:
         E_a = EllipticCurve(self.curve.Fp2, [0,a,0,1,0])
         xP = self.x/self.z
         yP = sqrt(xP**3+a1*xP**2 + xP)
+
         P_ws = E_a1(xP, yP)
         iso = E_a1.isomorphism_to(E_a)
         curve_target = copy(self.curve)
         curve_target.a = a
         return Point(iso(P_ws)[0], 1, curve_target)
-    
+
+    def isogeny_degree4k_strategy(self, Q, k, method, strategy, stop=0) :
+        '''
+        INPUT:
+        * self the point defining the kernel of the isogeny, of degree 4**k
+        * Q a point that we want to evaluate
+        * k such that the isogeny is of degree 4**k
+        * method a string defining the method to use : withKernel4, withKernel4k or withoutKernel
+        * strategy a list of integers representing the stragegy for browsing the tree
+        OUTPUT:
+        * phiQ the image of Q
+        * phiQ4k a point generating the dual isogeny kernel   (if method = 'kernel4k')
+        * listOfCurves the list of 4-isogenous curvesq        (if method = 'kernel4')
+        REMARKS:
+        * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
+        '''
+
+        l = k
+        phiP4k = self
+        curve_prime = copy(self.curve)
+        image_points = [Q] + [self]
+
+        listOfCurves_a = []
+
+        if method == 'kernel4k':
+            Q4k = self.dual_kernel_point(k)
+            #evaluate Q4k give the kernel of the dual isogeny
+            image_points += [Q4k]
+        Queue1 = deque()
+        Queue1.append([k, self])
+
+        PRINTCOUNTER = 0
+        DEC = 0
+
+        i = 0
+        F = self.curve
+        list1 = copy(image_points)
+        while len(Queue1) != 0 and l > stop :
+            [h, P] = Queue1.pop()
+            if h == 1 :
+                Queue2 = deque()
+                while len(Queue1) != 0 :
+                    [h, Q] = Queue1.popleft()
+                    [Q] = P.isogeny_degree4([Q])
+                    Queue2.append([h-1, Q])
+                Queue1 = Queue2
+                list1 = P.isogeny_degree4(list1)
+                PRINTCOUNTER+=1
+                if n(100*PRINTCOUNTER/k) > DEC :
+                    DEC += 10
+                    print floor(100*PRINTCOUNTER/k), '% of the bigstep'
+                F = list1[0].curve
+                if method == 'kernel4' :
+                    listOfCurves_a.append(F)
+                l -=  1
+            elif strategy[i] > 0 and strategy[i] < h :
+                Queue1.append([h, P])
+                P = 4**(strategy[i]) * P
+                Queue1.append([h-strategy[i], P])
+                i += 1
+            else :
+                return false
+        #output
+        phiQ = list1[0]
+
+        if method == 'kernel4k' :
+            # the point defining the dual is the 3rd one of image_points evaluated by the 4-isogenies
+            phiQ4k = list1[2]
+        else :
+            phiQ4k = ''
+
+        if method != 'kernel4' :
+            listOfCurves_a = ''
+        return [phiQ, phiQ4k, listOfCurves_a]
+
     def isogeny_degree4k(self, Q, k, method, stop=0) :
         '''
         INPUT:
@@ -299,3 +401,24 @@ class Point:
             listOfCurves_a = ''
         
         return [phiQ, phiQ4k, listOfCurves_a]
+
+    @staticmethod
+    def strategy(n, p, q):
+        '''
+        INPUT:
+        * n the height of the tree
+        * p the cost of one multiplication step
+        * q the cost of one isogeny step
+        OUTPUT:
+        * a list corresponding to a strategy
+        REMARK:
+        from Luca De Feo's answer on crypto.stackexchange.com
+        '''
+        S = { 1: [] }
+        C = { 1: 0 }
+        for i in range(2, n+2):
+            b, cost = min(((b, C[i-b] + C[b] + b*p + (i-b)*q) for b in range(1,i)), key=lambda t: t[1])
+            S[i] = [b] + S[i-b] + S[b]
+            C[i] = cost
+        return S[n+1]
+    

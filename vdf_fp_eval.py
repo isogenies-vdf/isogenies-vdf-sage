@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*- 
 from sage.all import *
-import point
-
+from point import Point
 
 def vdf_eval(c, setup, Q, verbose, method):
     '''
@@ -25,12 +24,12 @@ def vdf_eval(c, setup, Q, verbose, method):
     if method == 'kernel4k' :
         for R in kernelsOfBigSteps :
             R = R.change_iso_curve(c_t.a)
-            [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', stop=1)
+            [T, kernelPoint, listOfCurves] = R.isogeny_degree4k_strategy(T, k, method='withoutKernel', strategy=Point.strategy(k-1, 1, 1), stop=1)
             c_t = T.curve
     elif method == 'kernel4' :
 	cpt = 0
         for c1 in curvesPath :
-            R = point.Point(1,1,c1).change_iso_curve(c_t.a)
+            R = Point(1,1,c1).change_iso_curve(c_t.a)
             [T] = R.isogeny_degree4([T])
             c_t = T.curve
 	    #print 'isogeny of degree 4 computed :-)', cpt
