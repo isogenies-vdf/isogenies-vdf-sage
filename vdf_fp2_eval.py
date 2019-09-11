@@ -44,9 +44,9 @@ def vdf_eval(c, setup, Q, verbose, method):
     #not efficient
     fQ_ws = frob_T.weierstrass()
     Q_ws = T.weierstrass()
-    
+
     R1 = Q_ws + fQ_ws
     R2 = Q_ws - fQ_ws
-    
+
     #the (+/-) point to return is the one defined over Fp :-)
     return c.getPointFromWeierstrass(R1) if R1[0] in c.Fp and R1[1] in c.Fp else c.getPointFromWeierstrass(R2)
