@@ -78,7 +78,6 @@ time = cputime(time)
 print 'eval timing: ', time, ' seconds.'
 file.write('Eval:\t'+ str(time) + ' seconds.\n')
 
-
 #VERIFY
 if protocol == 'fp' :
     from vdf_fp_verif import *
