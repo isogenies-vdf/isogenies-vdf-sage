@@ -5,7 +5,7 @@ import curve
 
 from sage.all import *
 
-paramToSet = ['fp', 'kernel4k', 'p14-toy', 'nbIterations']
+paramToSet = ['fp', 'kernel4k', 'p14-toy', 12]
 
 for i in range(1, len(sys.argv)):
     paramToSet[i-1] = sys.argv[i]
