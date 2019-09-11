@@ -2,127 +2,52 @@
 from sage.all import *
 import curve
 
-def double_line(P, Q, a) :
-    # P is in jacobian coordinates and Q in affine coordinates
-    # returns the line tangent in P evaluated in Q, as a fraction, and the point 2*P in jacobian coordinates
-    
-    X, Y, Z = P[0], P[1], P[2]
-    xQ, yQ = Q[0], Q[1]
-    
-    t1 = Y**2
-    
-    t2 = X * t1
-    t2 = t2 + t2
-    t2 = t2 + t2
-    # t2 = 4 * X * Y**2
-    
-    t3 = t1**2
-    t3 = t3 + t3
-    t3 = t3 + t3
-    t3 = t3 + t3
-    # t3 = 8 * Y**4
-    
-    if len(P) == 4 :
-        t4 = P[3]
-    else : #for the non-new curves... 
-        t4 = Z**2
-        
-    if a == -3 :
-        t5 = (X - t4) * (X + t4)
-        t5 = t5 + t5 + t5
-    else :
-        t5 = X**2
-        t5 = t5 + t5 + t5
-        t6 = t4**2
-        t5 = t5 + a * t6
-    # t5 = 3 * X**2 + a * Z**4
-    
-    XX = t5**2 - t2 - t2
-    # XX = (3*X**2 + a*Z**4)**2 - 8*X*Y**2
-    YY = t5 * (t2 - XX) - t3
-    # YY = (3*X**2 + a*Z**4)*(4*X*Y**2 - XX) - 8*Y**4
-    ZZ = Y * Z
-    ZZ = ZZ + ZZ
-    # ZZ = 2*Y*Z
-    TT = ZZ**2
-    
-    # 6Spk + 3Mpk if a petit != -3
-    # 4Spk + 4Mpk if a == -3
-    
-    
-    mu_num = t5
-    # mu_num = 3 * X**2 + a * Z**4
-    
-    #
-    l_den = ZZ * t4
-    #
-    
-    # l_den = 2 * Y * Z**3
-    l_num = yQ * l_den - t1 - t1 - t5 * (t4 * xQ - X)
-    # l_num = yQ*l_den - 2 * Y**2 - mu_num * (Z**2* xQ - X)
-    
-    # 2 Mpk + 2k Mp
-    
-    
-    # Total:
-    #  if a == -3 : 4 Spk + 6 Mpk + 2k Mp
-    #  if a != -3 : 6 Spk + 5 Mpk + 2k Mp
-    
-    return [[l_num, l_den], [XX, YY, ZZ, TT]]
-
-def add_line(R, P, Q) :
-    # R is in jacobian coordinates and P, Q in affine coordinates
-    # returns the line P-R evaluated in Q, as a fraction, and the point P+R in jacobian coordinates
-    
-    X1, Y1, Z1 = R[0], R[1], R[2]
-    X, Y = P[0], P[1]
-    xQ, yQ = Q[0], Q[1]
-    
-    if len(R) == 4 :
-        t1 = R[3]
-    else : #useful for non-new curves...
-        t1 = Z1**2
-    t2 = Z1 * t1        # Z1**3
-    t3 = X * t1         # XZ1**2
-    t4 = Y * t2         # YZ1**3
-    t5 = t3 - X1        # XZ1**2 - X1
-    t6 = t4 - Y1        # YZ1**3 - Y1
-    t7 = t5**2           # (XZ1**2-X1)**2
-    t8 = t5 * t7        # (XZ1**2-X1)**3
-    t9 = X1 * t7        # (XZ1**2-X1)**2Z1**2
-    
-    X3 = t6**2 - (t8 + t9 + t9)
-    Y3 = t6 * (t9 - X3) - Y1 * t8
-    Z3 = Z1 * t5
-    T3 = Z3**2
-    # 3 Spk + 8 Mpk
-    
-
+def eval_line(R, P, Q) :
     """
-    X3 = (Y*Z1**3 - Y1)**2 - (X*Z1**2 - X1)**2 * (X1 + X*Z1**2)
-    Y3 = (Y*Z1**3 - Y1) * ((X*Z1**2 - X1)**2*X1 - X3) - Y1 * (X*Z1**2 - X1)**3
-    Z3 = (X*Z1**2 - X1) * Z1
-    T3 = Z3**2
+    INPUT: 
+    * R a point of an EllipticCurve object
+    * P a point of an EllipticCurve object
+    * Q a point of an EllipticCurve object
+    OUPUT:
+    * The line through P and R evaluated at Q, given with the numerator and
+      the denominator.
+    * The point P+R
     """
-    
-    mu_num = t6
-    # mu_num = (Y*Z1**3 - Y1)
-    
-    mu_den = Z3
-        
-    # mu_den = Z1 * (X * Z1**2 - X1)
-    l_num = mu_den * (yQ - Y) - mu_num * (xQ - X)
-    # l_num =  Z1 * (X * Z1**2 - X1) * (yQ - Y) - (Y*Z1**3 - Y1) * (xQ - X)
-    
-    l_den = mu_den
-    # l_den = Z1 * (X * Z1**2 - X1)
-    
-    # 2 Mpk
-    
-    # Total: 10 Mpk + 3 Spk
-    return [[l_num, l_den], [X3, Y3, Z3, T3]]
+    if Q.is_zero():
+        raise ValueError("Q must be nonzero.")
 
-def miller(P, Q, n, a, denominator=False) :
+    if P.is_zero() or R.is_zero():
+        if P == R:
+            return [P, [P.curve().base_field().one(), 1]]
+        if P.is_zero():
+            return [R, [Q[0] - R[0], 1]]
+        if R.is_zero():
+            return [P, [Q[0] - P[0], 1]]
+    elif P != R:
+        if P[0] == R[0]:
+            return [P.curve()(0), [Q[0] - P[0], 1]]
+        else:
+            lnum, lden = (R[1] - P[1]), (R[0] - P[0])
+            xPplusR = (lnum**2) - (lden**2)*(P[0] + R[0])
+            yPplusR = R[1]*(lden**3) + lnum*(xPplusR - (lden**2)*R[0])
+            zPplusR = lden**3
+            PplusR = P.curve()(lden*xPplusR, -yPplusR, zPplusR)
+            return [PplusR, [lden * (Q[1] - P[1])  - lnum * (Q[0] - P[0]), lden]]
+    else:
+        a1, a2, a3, a4, a6 = P.curve().a_invariants()
+        numerator = (3*P[0]**2 + 2*a2*P[0] + a4 - a1*P[1])
+        denominator = (2*P[1] + a1*P[0] + a3)
+        if denominator == 0:
+            return [P.curve()(0), [Q[0] - P[0], 1]] #except in characteristic 2 ?
+        else:
+            #l = numerator/denominator
+            x2P = numerator**2 - 2* P[0]*denominator**2
+            y2P = P[1]*denominator**3 + numerator*(x2P - (denominator**2) *P[0])
+            z2P = denominator**3
+            twoP = P.curve()(denominator*x2P, -y2P, z2P)
+            return [twoP, [denominator * (Q[1] - P[1]) - numerator * (Q[0] - P[0]), denominator]]
+
+def miller(P, Q, n, denominator=False) :
     # return the miller loop f_{P, n}(Q) for an even embedded degree curve
     if Q.is_zero():
         raise ValueError("Q must be nonzero.")
@@ -133,35 +58,35 @@ def miller(P, Q, n, a, denominator=False) :
     if n < 0:
         n = n.abs()
         n_is_negative = True
-        
     t_num, t_den = 1, 1
     V = P
     S = 2*V # V=P is in affine coordinates
     nbin = n.bits()
     i = n.nbits() - 2
     while i > -1:
-        [[ell_num, ell_den], S] = double_line(V, Q, a)
-        t_num =(t_num**2)*ell_num
+        [S, [ell_num, ell_den]] = eval_line(V, V, Q)
+        t_num = (t_num**2)*ell_num
         if denominator :
-            t_den =(t_den**2)*ell_den
-        
+            [R, [vee_num, vee_den]] = eval_line(S, -S, Q)
+            t_den = (t_den**2)*ell_den*vee_num
+            t_num *= vee_den
         V = S
         if nbin[i] == 1:
-            [[ell_num, ell_den], S] = add_line(V, P, Q)
+            [S, [ell_num, ell_den]] = eval_line(V, P, Q)
             t_num = t_num*ell_num
             if denominator :
-                t_den = t_den*ell_den
-            
+                [R, [vee_num, vee_den]] = eval_line(S, -S, Q)
+                t_den *= ell_den*vee_num
+                t_num *= vee_den
             V = S
         i = i-1
-    
     if not(denominator) :
         t_den = 1
-    
     if n_is_negative :
         t_num, t_den = t_den, t_num
-        S[1] = -S[1]
-    return [[t_num,t_den], S]
+        S = -S
+    return [S, [t_num,t_den]]
+
 
 def exponentiation(curve, x) :
     """
@@ -182,13 +107,13 @@ def exponentiation(curve, x) :
 def miller_ATE(curve, P, Q, denominator=False) :
     t = -2 * curve.p
     a = curve.weierstrass().a4()
-    m1, L = miller(Q, P, t - 1, a, denominator)
+    L, m1 = miller(Q, P, t-1, denominator)
     return [m1[0],m1[1]] 
 
 def ATE(curve, P, Q, denominator=False) :
     t = -2 * curve.p
     a = curve.weierstrass().a4()
-    m1, L = miller(Q, P, t - 1, a, denominator)
+    L, m1 = miller(Q, P, t-1, denominator)
     #maybe an inversion if t-1 < 0
     m2 = m1[0]/m1[1]
     return exponentiation(curve, m2)
@@ -196,7 +121,7 @@ def ATE(curve, P, Q, denominator=False) :
 def TATE(curve, P, Q, denominator=False) :
     #if the curve is defined over Fp, we do not compute the denominators
     a = curve.weierstrass().a4()
-    m1, L = miller(P, Q, curve.N, a, denominator)
+    m1, L = miller(P, Q, curve.N, denominator)
     m2 = m1[0]/m1[1]
     return exponentiation(curve, m2)
     #if the curve is defined over Fp2, we need to compute denominators

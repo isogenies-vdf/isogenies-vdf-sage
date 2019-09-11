@@ -29,28 +29,45 @@ def vdf_verif(c, setup, Q, Tr_hat_phiQ) :
     phiP_ws = phiP.weierstrass()
     Q_ws = Q.weierstrass()
     Tr_hat_phiQ_ws = Tr_hat_phiQ.weierstrass()
+
+    '''working
+    print 'weil'
+    print Tr_hat_phiQ_ws.weil_pairing(P_ws, ZZ(c.N))
+    print Q_ws.weil_pairing(phiP_ws, ZZ(c.N))**2
+    print Q_ws.weil_pairing(phiP_ws, ZZ(c.N))**(-2)
+
+    print 'tate'
+    print Tr_hat_phiQ_ws.tate_pairing(P_ws, ZZ(c.N), 2)
+    print Q_ws.tate_pairing(phiP_ws, ZZ(c.N), 2)**2
+    print Q_ws.tate_pairing(phiP_ws, ZZ(c.N), 2)**(-2)
+    '''
     
-    #TODO: Change with an efficient ate pairing !
-    
-    phiP_miller_Q = phiP_ws._miller_(Q_ws, -2  * ZZ(c.p)-1)
-    e2 = exponentiation(c, phiP_miller_Q)**2
-    
-    #
-    #ate ?
-    #Q_miller_phiP= Q_ws._miller_(phiP_ws, ZZ(c.N))
-    #e2 = exponentiation(c, Q_miller_phiP)**2
-    #
-    
-    e_Tr_hat_phiQ_P = ATE(c, Tr_hat_phiQ_ws, P_ws)
-    
-    #assert e_Tr_hat_phiQ_P == Tr_hat_phiQ_ws.ate_pairing(P_ws, ZZ(c.N),2, -2*ZZ(c.p))
-    
-    if e_Tr_hat_phiQ_P != 1 :
-        if e_Tr_hat_phiQ_P == e2 :
+    '''not working
+    print 'ate'
+    print Tr_hat_phiQ_ws.ate_pairing(P_ws, ZZ(c.N), 2, ZZ(-2*c.p))
+    print Q_ws.ate_pairing(phiP_ws, ZZ(c.N), 2, ZZ(-2*c.p))**2
+    print Q_ws.ate_pairing(phiP_ws, ZZ(c.N), 2, ZZ(-2*c.p))**(-2)
+    '''
+
+    #mil1 = Tr_hat_phiQ_ws._miller_(P_ws, ZZ(c.N))
+    _Z, mil11 = miller(Tr_hat_phiQ_ws, P_ws, ZZ(c.N), denominator=True)
+    #assert mil1**((ZZ(c.p)**2-1)/ZZ(c.N)) == Tr_hat_phiQ_ws.tate_pairing(P_ws, ZZ(c.N), 2)
+    e1 = exponentiation(c, mil11[0]/mil11[1])
+    #assert e1 == Tr_hat_phiQ_ws.tate_pairing(P_ws, ZZ(c.N), 2)
+
+    #mil2 = Q_ws._miller_(phiP_ws, ZZ(c.N))
+    _Z, mil22 = miller(Q_ws, phiP_ws, ZZ(c.N), denominator=True)
+    #assert mil2 == mil22[0]/mil22[1]
+    e2_squared = exponentiation(c, mil22[0]/mil22[1])**2
+    #assert e2_squared == Q_ws.tate_pairing(phiP_ws, ZZ(c.N), 2)**2
+
+    if e1 != 1 :
+        if e1 == e2_squared :
             return True
-        if e_Tr_hat_phiQ_P == 1/e2:
+        if e1 == 1/e2_squared:
             return True
         print 'Pairing equation does not hold.'
         return False
     print 'e_Tr_hat_phiQ_P EQUALS 1'
     return False
+

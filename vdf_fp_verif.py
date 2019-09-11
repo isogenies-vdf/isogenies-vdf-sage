@@ -26,6 +26,31 @@ def vdf_verif(curve, setup, Q, hat_phiQ) :
     Q_ws = Q.weierstrass()
     hat_phiQ_ws = hat_phiQ.weierstrass()
     
+    
+    #mil1 = hat_phiQ_ws._miller_(P_ws, ZZ(curve.N))
+    _Z, mil11 = miller(hat_phiQ_ws, P_ws, ZZ(curve.N), denominator=False)
+    e1 = exponentiation(curve, mil11[0]/mil11[1])
+    #assert e1 == hat_phiQ_ws.tate_pairing(P_ws, ZZ(curve.N), 2)
+
+    #mil2 = Q_ws._miller_(phiP_ws, ZZ(curve.N))
+    _Z, mil22 = miller(Q_ws, phiP_ws, ZZ(curve.N), denominator=False)
+    e2 = exponentiation(curve, mil22[0]/mil22[1])
+    #assert e2 == Q_ws.tate_pairing(phiP_ws, ZZ(curve.N), 2)
+
+    if e1 != 1 :
+        if e1 == e2 :
+            return True
+        if e1 == 1/e2:
+            return True
+        print 'Pairing equation does not hold.'
+        return False
+    print 'e_Tr_hat_phiQ_P EQUALS 1'
+    
+
+
+
+
+
     e_phiP_Q = TATE(setup[1], Q_ws, phiP_ws)
     e_hat_phiQ_P = TATE(curve, hat_phiQ_ws, P_ws)
     
