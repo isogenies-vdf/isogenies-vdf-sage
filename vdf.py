@@ -5,7 +5,7 @@ import curve
 
 from sage.all import *
 
-paramToSet = ['fp', 'kernel4k', 'p14-toy']
+paramToSet = ['fp', 'kernel4k', 'p14-toy', 'nbIterations']
 
 for i in range(1, len(sys.argv)):
     paramToSet[i-1] = sys.argv[i]
@@ -16,26 +16,51 @@ if paramToSet[1] != 'kernel4' and paramToSet[1] != 'kernel4k' :
 if paramToSet[2] != 'p14-toy' and paramToSet[2] != 'p89-toy' and paramToSet[2] != 'p1506' :
     paramToSet[2] = 'p14-toy'
 
-[protocol, method, pSize] = paramToSet
+[protocol, method, pSize, nbIterations] = paramToSet
+nbIterations = int(nbIterations)
 
 verbose = False
 
-file = open("timing_" + protocol + "_" + method + "_" + pSize + ".txt", "a")
-
 if pSize == 'p14-toy' :
-    c = curve.Curve(1, 8, 53, 10088, 1, (8-2)*12)
+    f = 1
+    n = 8
+    N = 53
+    a = 10088
+    alpha = 1
 if pSize == 'p89-toy' :
-    c = curve.Curve(1, 64, 27212093, 6, 1, (64-2)*12)
+    f = 1
+    n = 64
+    N = 27212093
+    a = 6
+    alpha = 1
 if pSize == 'p1506' :
-    c = curve.Curve(63, 1244, 0xc0256a57b1434a4970e315e3e572ad7b6b6268ca27a1bc14a5ec8d6e8f46ab63, 138931309558156184106311716917677778941761847991286360325642242809534952018704195842136094062347931842162775765708572232752796610393601192925341167860358529602430304979627494497048448960083384310735203052588819895230906248500388348984991092188849520120483947949612966752973461165325952933739065855693165670941141036576698048539586409219548698834122183984266610530679658299939991747759033936995784464828547439035421618098378714023855965416127212175477937, 3, (1244-2)*28)
+    f = 63
+    n = 1244
+    N = 0xc0256a57b1434a4970e315e3e572ad7b6b6268ca27a1bc14a5ec8d6e8f46ab63
+    a = 138931309558156184106311716917677778941761847991286360325642242809534952018704195842136094062347931842162775765708572232752796610393601192925341167860358529602430304979627494497048448960083384310735203052588819895230906248500388348984991092188849520120483947949612966752973461165325952933739065855693165670941141036576698048539586409219548698834122183984266610530679658299939991747759033936995784464828547439035421618098378714023855965416127212175477937
+    alpha = 3
+
+# Choice of Delta depending on nbIterations and n
+Delta = nbIterations
+if protocol == 'fp' :
+    while Delta % (n-2) != 0 or (Delta // (n-2)) % 2 != 0:
+        Delta += 1
+else :
+    while Delta % n != 0 or (Delta // n) % 2 != 0:
+        Delta += 1
+print 'Delta=',Delta
+c = curve.Curve(f, n, N, a, alpha, Delta)
+
 if protocol == 'fp' :
     # for the Fp protocol, choose Delta = (n-2) * evenNumber
     assert c.Delta % (c.n - 2) == 0
     assert (c.Delta // (c.n - 2)) % 2 == 0
 else :
-    # for the Fp2 protocol, choose Delta = n * number (?TOCHECK)
-    c.Delta = c.Delta + 2 * (c.Delta // (c.n - 2))
+    # for the Fp2 protocol, choose Delta = n * number
     assert c.Delta % c.n == 0
+    assert (c.Delta // c.n) % 2 == 0
+
+file = open("timing_" + protocol + "_" + method + "_" + pSize + "_" + str(c.Delta) + "steps.txt", "a")
 
 file.write("VDF over " + protocol + " with log_2(p) = " + str(ZZ(c.p).nbits()) + " and log_2(T) = " + str(ZZ(c.Delta).nbits()) + ".\n")
 if method == 'kernel4' :
