@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
-from sage.all import *
 from point import Point
 import curve
+from sage.rings.integer_ring import ZZ
 
 def vdf_eval(c, setup, Q, verbose, method):
     '''

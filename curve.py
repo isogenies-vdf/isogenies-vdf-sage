@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*- 
-from sage.all_cmdline import *
 import point
+from sage.rings.finite_rings.finite_field_constructor import GF
+from sage.arith.misc import valuation
+from sage.schemes.elliptic_curves.constructor import EllipticCurve
 
-proof.arithmetic(False)
 class Curve:
     def __init__(self, f, n, N, a, ext, Delta):
         self.f = f

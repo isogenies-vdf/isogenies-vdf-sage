@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import time
 import point
 import curve
 import argparse
+from sage.rings.integer_ring import ZZ
+from sage.misc.misc import cputime
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--protocol", type=str, default="fp",
@@ -23,10 +24,10 @@ method = args.method
 pSize = args.pSize
 nbIterations = int(args.nbIterations)
 
-if args.verbose:
-    print("verbosity turned on")
+verbose =  args.verbose
 
-from sage.all import *
+if verbose:
+    print("verbosity turned on")
 
 if pSize == 'p14-toy' :
     f = 1
@@ -80,12 +81,12 @@ if protocol == 'fp' :
 else :
     from vdf_fp2_setup import *
 
-time = cputime()
+tt = cputime()
 setup = vdf_setup(c, verbose, method)
-time = cputime(time)
-print 'setup timing: ', time, ' seconds.'
+tt = cputime(tt)
+print 'setup timing: ', tt, ' seconds.'
 [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
-file.write("Setup:\t" + str(time) + " seconds.\n")
+file.write("Setup:\t" + str(tt) + " seconds.\n")
 
 #Generating a point Q
 #NOT IN THE SAME SUBGROUP AS phiP !!!
@@ -104,11 +105,11 @@ if protocol == 'fp' :
 else :
     from vdf_fp2_eval import *
 
-time = cputime()
+tt = cputime()
 Tr_hat_phiQ = vdf_eval(c, setup, Q, verbose, method)
-time = cputime(time)
-print 'eval timing: ', time, ' seconds.'
-file.write('Eval:\t'+ str(time) + ' seconds.\n')
+tt = cputime(tt)
+print 'eval timing: ', tt, ' seconds.'
+file.write('Eval:\t'+ str(tt) + ' seconds.\n')
 
 #VERIFY
 if protocol == 'fp' :
@@ -116,11 +117,11 @@ if protocol == 'fp' :
 else :
     from vdf_fp2_verif import *
 
-time = cputime()
+tt = cputime()
 ver = vdf_verif(c, setup, Q, Tr_hat_phiQ)
-time = cputime(time)
-print 'verif timing: ', time, ' seconds.'
-file.write('Verif:\t' + str(time) + ' seconds.\n')
+tt = cputime(tt)
+print 'verif timing: ', tt, ' seconds.'
+file.write('Verif:\t' + str(tt) + ' seconds.\n')
 print '###############'
 if ver :
     print '#verif OK  :-)#'
