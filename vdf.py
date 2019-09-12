@@ -2,22 +2,31 @@
 import time
 import point
 import curve
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--protocol", type=str, default="fp",
+                    help="choose the VDF protocol to use")
+parser.add_argument("--method", type=str, default="kernel4k",
+                    help="choose the method to store the setup walk")
+parser.add_argument("--pSize", type=str, default="p14-toy",
+                    help="determine the size of the prime p to use")
+parser.add_argument("--nbIterations", type=int, default=12,
+                    help="set the number of iterations of the VDF")
+parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                    action="store_true")
+
+args = parser.parse_args()
+
+protocol = args.protocol
+method = args.method
+pSize = args.pSize
+nbIterations = int(args.nbIterations)
+
+if args.verbose:
+    print("verbosity turned on")
 
 from sage.all import *
-
-paramToSet = ['fp', 'kernel4k', 'p14-toy', 12]
-
-for i in range(1, len(sys.argv)):
-    paramToSet[i-1] = sys.argv[i]
-if paramToSet[0] != 'fp' and paramToSet[0] != 'fp2' :
-    paramToSet[0] = 'fp'
-if paramToSet[1] != 'kernel4' and paramToSet[1] != 'kernel4k' :
-    paramToSet[1] = 'kernel4k'
-if paramToSet[2] != 'p14-toy' and paramToSet[2] != 'p89-toy' and paramToSet[2] != 'p1506' :
-    paramToSet[2] = 'p14-toy'
-
-[protocol, method, pSize, nbIterations] = paramToSet
-nbIterations = int(nbIterations)
 
 verbose = False
 
