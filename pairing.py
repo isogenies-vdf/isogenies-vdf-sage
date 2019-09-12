@@ -103,3 +103,36 @@ def exponentiation(curve, x) :
     for i in range(curve.n-1) :
         x3 = x3**2
     return x3/x2
+
+def miller_ATE(curve, P, Q, denominator=False) :
+    t = -2 * curve.p
+    a = curve.weierstrass().a4()
+    L, m1 = miller(Q, P, t-1, denominator)
+    return [m1[0],m1[1]] 
+
+def ATE(curve, P, Q, denominator=False) :
+    t = -2 * curve.p
+    a = curve.weierstrass().a4()
+    L, m1 = miller(Q, P, t-1, denominator)
+    #maybe an inversion if t-1 < 0
+    m2 = m1[0]/m1[1]
+    return exponentiation(curve, m2)
+
+def TATE(curve, P, Q, denominator=False) :
+    #if the curve is defined over Fp, we do not compute the denominators
+    a = curve.weierstrass().a4()
+    m1, L = miller(P, Q, curve.N, denominator)
+    m2 = m1[0]/m1[1]
+    return exponentiation(curve, m2)
+    #if the curve is defined over Fp2, we need to compute denominators
+    #my double_line and add_line do not work for the moment
+    #I use the Sage ones...
+    
+    #R = (curve.p+1)//curve.N * Q.parent().random_point()
+    #while R == 0 : 
+    #    R = (curve.p+1)//curve.N * Q.parent().random_point()
+    #assert P.weil_pairing(Q+R, ZZ(curve.N)) !=  P.weil_pairing(R, ZZ(curve.N))
+    #m1, L = miller(P, Q+R, curve.N, a, denominator)
+    #m11, L = miller(P, R, curve.N, a)
+    #m2 = m1[0] * m11[1]/(m1[1]* m11[0])
+
