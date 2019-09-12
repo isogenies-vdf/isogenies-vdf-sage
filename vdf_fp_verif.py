@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- 
-from pairing import *
-    
+import pairing
+from sage.rings.integer_ring import ZZ
+
 def vdf_verif(curve, setup, Q, hat_phiQ) :
     '''
     INPUT:
@@ -28,13 +29,13 @@ def vdf_verif(curve, setup, Q, hat_phiQ) :
     
     
     #mil1 = hat_phiQ_ws._miller_(P_ws, ZZ(curve.N))
-    _Z, mil11 = miller(hat_phiQ_ws, P_ws, ZZ(curve.N), denominator=False)
-    e1 = exponentiation(curve, mil11[0]/mil11[1])
+    _Z, mil11 = pairing.miller(hat_phiQ_ws, P_ws, ZZ(curve.N), denominator=False)
+    e1 = pairing.exponentiation(curve, mil11[0]/mil11[1])
     #assert e1 == hat_phiQ_ws.tate_pairing(P_ws, ZZ(curve.N), 2)
 
     #mil2 = Q_ws._miller_(phiP_ws, ZZ(curve.N))
-    _Z, mil22 = miller(Q_ws, phiP_ws, ZZ(curve.N), denominator=False)
-    e2 = exponentiation(curve, mil22[0]/mil22[1])
+    _Z, mil22 = pairing.miller(Q_ws, phiP_ws, ZZ(curve.N), denominator=False)
+    e2 = pairing.exponentiation(curve, mil22[0]/mil22[1])
     #assert e2 == Q_ws.tate_pairing(phiP_ws, ZZ(curve.N), 2)
 
     if e1 != 1 :

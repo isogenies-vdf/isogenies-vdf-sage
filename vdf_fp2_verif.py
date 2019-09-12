@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- 
-from pairing import *
+import pairing
+from sage.rings.integer_ring import ZZ
 
 def vdf_verif(c, setup, Q, Tr_hat_phiQ) :
     '''
@@ -50,15 +51,15 @@ def vdf_verif(c, setup, Q, Tr_hat_phiQ) :
     '''
 
     #mil1 = Tr_hat_phiQ_ws._miller_(P_ws, ZZ(c.N))
-    _Z, mil11 = miller(Tr_hat_phiQ_ws, P_ws, ZZ(c.N), denominator=True)
+    _Z, mil11 = pairing.miller(Tr_hat_phiQ_ws, P_ws, ZZ(c.N), denominator=True)
     #assert mil1**((ZZ(c.p)**2-1)/ZZ(c.N)) == Tr_hat_phiQ_ws.tate_pairing(P_ws, ZZ(c.N), 2)
-    e1 = exponentiation(c, mil11[0]/mil11[1])
+    e1 = pairing.exponentiation(c, mil11[0]/mil11[1])
     #assert e1 == Tr_hat_phiQ_ws.tate_pairing(P_ws, ZZ(c.N), 2)
 
     #mil2 = Q_ws._miller_(phiP_ws, ZZ(c.N))
-    _Z, mil22 = miller(Q_ws, phiP_ws, ZZ(c.N), denominator=True)
+    _Z, mil22 = pairing.miller(Q_ws, phiP_ws, ZZ(c.N), denominator=True)
     #assert mil2 == mil22[0]/mil22[1]
-    e2_squared = exponentiation(c, mil22[0]/mil22[1])**2
+    e2_squared = pairing.exponentiation(c, mil22[0]/mil22[1])**2
     #assert e2_squared == Q_ws.tate_pairing(phiP_ws, ZZ(c.N), 2)**2
 
     if e1 != 1 :
