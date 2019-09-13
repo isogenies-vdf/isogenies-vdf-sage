@@ -8,7 +8,7 @@ where:
 - `PROTOCOL` is `fp` or `fp2`
 - `METHOD` is `kernel4k` or `kernel4`
 - `PSIZE` is `p14-toy`, `p89-toy` or `p1506`
-- `NBITERATIONS` is an integer
+- `NBITERATIONS` is the number of 2-isogenies to compute for the evaluation.
 
 # Issues.
 
