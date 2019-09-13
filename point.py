@@ -321,7 +321,7 @@ class Point:
                 if n(100*PRINTCOUNTER/k) > DEC :
                     DEC += 10
                     if k>50 :
-						print(floor(100*PRINTCOUNTER/k), '% of the (big) step')
+						print('%d\% of the (big) step' % floor(100*PRINTCOUNTER/k))
                 F = list1[0].curve
                 if method == 'kernel4' :
                     listOfCurves_a.append(F)

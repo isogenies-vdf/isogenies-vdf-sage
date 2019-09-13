@@ -32,6 +32,5 @@ def vdf_eval(c, setup, Q, verbose, method):
             R = Point(1,1,c1).change_iso_curve(c_t.a)
             [T] = R.isogeny_degree4([T])
             c_t = T.curve
-	    #print('isogeny of degree 4 computed :-)', cpt)
 	    cpt += 1
     return T.change_iso_curve(c.a)
