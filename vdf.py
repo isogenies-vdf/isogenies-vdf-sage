@@ -57,7 +57,7 @@ if protocol == 'fp' :
 else :
     while Delta % n != 0 or (Delta // n) % 2 != 0:
         Delta += 1
-print('Delta =%d' % Delta)
+print('Delta = %d' % Delta)
 
 c = curve.Curve(f, n, N, a, alpha, Delta, strategy)
 
@@ -86,7 +86,7 @@ else :
 time = cputime()
 setup = vdf_setup(c, verbose, method)
 time = cputime(time)
-print('setup timing: %d seconds.' % time)
+print('setup timing: %.5f seconds.' % time)
 [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
 file.write("Setup:\t" + str(time) + " seconds.\n")
 
@@ -110,7 +110,7 @@ else :
 time = cputime()
 Tr_hat_phiQ = vdf_eval(c, setup, Q, verbose, method)
 time = cputime(time)
-print('eval timing: %d seconds.' % time)
+print('eval timing: %.5f seconds.' % time)
 file.write('Eval:\t'+ str(time) + ' seconds.\n')
 
 #VERIFY
@@ -122,7 +122,7 @@ else :
 time = cputime()
 ver = vdf_verif(c, setup, Q, Tr_hat_phiQ)
 time = cputime(time)
-print('verif timing: %d seconds.' % time)
+print('verif timing: %.5f seconds.' % time)
 file.write('Verif:\t' + str(time) + ' seconds.\n')
 print('###############')
 if ver :
