@@ -57,7 +57,7 @@ def isogeny_walk(curve, P, verbose, method) :
                 P4k = curve_prime.point_order(4**k, 2)
                 P4 = P4k.get_P4(k)
                 xP4 = P4.normalize().x
-        [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k_strategy(ev_P, k, method, strategy=Point.strategy(k-1, 1, 1))
+        [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k_strategy(ev_P, k, method, strategy=P4k.curve.strategy)
         kernelsOfBigSteps += [kernelDual]
         curvesPath += listOfCurves
         curve_prime = ev_P.curve
