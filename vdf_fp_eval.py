@@ -15,7 +15,7 @@ def vdf_eval(c, setup, Q, verbose, method):
     '''
     [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
     if c.Delta % (c.n-2) != 0 :
-        print 'Delta is not a multiple of n-2'
+        print('Delta is not a multiple of n-2')
         return False
     k = ZZ((c.n-2)//2)
     T = Q
@@ -32,6 +32,6 @@ def vdf_eval(c, setup, Q, verbose, method):
             R = Point(1,1,c1).change_iso_curve(c_t.a)
             [T] = R.isogeny_degree4([T])
             c_t = T.curve
-	    #print 'isogeny of degree 4 computed :-)', cpt
+	    #print('isogeny of degree 4 computed :-)', cpt)
 	    cpt += 1
     return T.change_iso_curve(c.a)

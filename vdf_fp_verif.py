@@ -16,7 +16,7 @@ def vdf_verif(curve, setup, Q, hat_phiQ) :
     P, phiP = setup [0], setup[-1]
     
     if not(hat_phiQ.in_curve() and hat_phiQ.is_order(curve.N)) :
-        print 'evaluation step does not give point of the curve of order N'
+        print('evaluation step does not give point of the curve of order N')
         return False
     
     # this does not depend on the eval answer, and can be computed before the eval
@@ -42,9 +42,9 @@ def vdf_verif(curve, setup, Q, hat_phiQ) :
             return True
         if e1 == 1/e2:
             return True
-        print 'Pairing equation does not hold.'
+        print('Pairing equation does not hold.')
         return False
-    print 'e_Tr_hat_phiQ_P EQUALS 1'
+    print('e_Tr_hat_phiQ_P EQUALS 1')
     
 
 

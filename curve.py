@@ -50,7 +50,7 @@ class Curve:
         if k == 2**(valuation(k,2)) :
             l = valuation(k,2)
             if (l > self.n) :
-                print "there is no point of order 2^" + str(l) + " Fp^" + str(extension_field)
+                print("there is no point of order 2^" + str(l) + " Fp^" + str(extension_field))
                 return False
             cof = (self.p+1) // (2**l)
             
@@ -58,7 +58,7 @@ class Curve:
                 # As  E(Fp) \simeq ZZ / ((p+1)/2) ZZ \times ZZ / 2 ZZ
                 # there is no point of order 2^curve.n
                 if l == self.n :
-                    print 'impossible to get a point of order 2^' + str(l)+' over Fp'
+                    print('impossible to get a point of order 2^' + str(l)+' over Fp')
                     return False
                 else :
                     # we need to divide by 2 the cofactor because of the ZZ / 2 ZZ part above

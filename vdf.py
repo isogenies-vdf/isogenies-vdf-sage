@@ -57,7 +57,7 @@ if protocol == 'fp' :
 else :
     while Delta % n != 0 or (Delta // n) % 2 != 0:
         Delta += 1
-print 'Delta =', Delta
+print('Delta =', Delta)
 
 c = curve.Curve(f, n, N, a, alpha, Delta, strategy)
 
@@ -86,7 +86,7 @@ else :
 time = cputime()
 setup = vdf_setup(c, verbose, method)
 time = cputime(time)
-print 'setup timing: ', time, ' seconds.'
+print('setup timing: ', time, ' seconds.')
 [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
 file.write("Setup:\t" + str(time) + " seconds.\n")
 
@@ -110,7 +110,7 @@ else :
 time = cputime()
 Tr_hat_phiQ = vdf_eval(c, setup, Q, verbose, method)
 time = cputime(time)
-print 'eval timing: ', time, ' seconds.'
+print('eval timing: ', time, ' seconds.')
 file.write('Eval:\t'+ str(time) + ' seconds.\n')
 
 #VERIFY
@@ -122,18 +122,18 @@ else :
 time = cputime()
 ver = vdf_verif(c, setup, Q, Tr_hat_phiQ)
 time = cputime(time)
-print 'verif timing: ', time, ' seconds.'
+print('verif timing: ', time, ' seconds.')
 file.write('Verif:\t' + str(time) + ' seconds.\n')
-print '###############'
+print('###############')
 if ver :
-    print '#verif OK  :-)#'
+    print('#verif OK  :-)#')
     file.write('verif ok\n')
 else :
-    print '#verif nOK :-(#'
+    print('#verif nOK :-(#')
     file.write('verif nok\n')
     file.write("setup = " + str(setup)+ "\n")
     file.write("Tr_hat_phiQ = " + str(Tr_hat_phiQ) + "\n")
-print '###############'
+print('###############')
 
 file.write("\n")
 file.close()

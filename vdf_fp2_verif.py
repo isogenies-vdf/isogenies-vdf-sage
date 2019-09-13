@@ -14,13 +14,13 @@ def vdf_verif(c, setup, Q, Tr_hat_phiQ) :
     [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
     
     if not(Tr_hat_phiQ.in_curve() and Tr_hat_phiQ.x in c.Fp and Tr_hat_phiQ.z in c.Fp) :
-        print 'evaluation step does not give point of the curve defined over Fp'
+        print('evaluation step does not give point of the curve defined over Fp')
         return False
     
     #
     #for R in Tr_hat_phiQ :
     #    #if not(R.in_curve() and  R.x in c.Fp and R.z in c.Fp) :
-    #        #print 'evaluation step does not give point of the curve defined over Fp'
+    #        #print('evaluation step does not give point of the curve defined over Fp')
     #        #return False
     #
 
@@ -31,22 +31,22 @@ def vdf_verif(c, setup, Q, Tr_hat_phiQ) :
     Tr_hat_phiQ_ws = Tr_hat_phiQ.weierstrass()
 
     '''working
-    print 'weil'
-    print Tr_hat_phiQ_ws.weil_pairing(P_ws, ZZ(c.N))
-    print Q_ws.weil_pairing(phiP_ws, ZZ(c.N))**2
-    print Q_ws.weil_pairing(phiP_ws, ZZ(c.N))**(-2)
+    print('weil')
+    print(Tr_hat_phiQ_ws.weil_pairing(P_ws, ZZ(c.N)))
+    print(Q_ws.weil_pairing(phiP_ws, ZZ(c.N))**2)
+    print(Q_ws.weil_pairing(phiP_ws, ZZ(c.N))**(-2))
 
-    print 'tate'
-    print Tr_hat_phiQ_ws.tate_pairing(P_ws, ZZ(c.N), 2)
-    print Q_ws.tate_pairing(phiP_ws, ZZ(c.N), 2)**2
-    print Q_ws.tate_pairing(phiP_ws, ZZ(c.N), 2)**(-2)
+    print('tate')
+    print(Tr_hat_phiQ_ws.tate_pairing(P_ws, ZZ(c.N), 2))
+    print(Q_ws.tate_pairing(phiP_ws, ZZ(c.N), 2)**2)
+    print(Q_ws.tate_pairing(phiP_ws, ZZ(c.N), 2)**(-2))
     '''
     
     '''not working
-    print 'ate'
-    print Tr_hat_phiQ_ws.ate_pairing(P_ws, ZZ(c.N), 2, ZZ(-2*c.p))
-    print Q_ws.ate_pairing(phiP_ws, ZZ(c.N), 2, ZZ(-2*c.p))**2
-    print Q_ws.ate_pairing(phiP_ws, ZZ(c.N), 2, ZZ(-2*c.p))**(-2)
+    print('ate')
+    print(Tr_hat_phiQ_ws.ate_pairing(P_ws, ZZ(c.N), 2, ZZ(-2*c.p)))
+    print(Q_ws.ate_pairing(phiP_ws, ZZ(c.N), 2, ZZ(-2*c.p))**2)
+    print(Q_ws.ate_pairing(phiP_ws, ZZ(c.N), 2, ZZ(-2*c.p))**(-2))
     '''
 
     #mil1 = Tr_hat_phiQ_ws._miller_(P_ws, ZZ(c.N))
@@ -66,8 +66,8 @@ def vdf_verif(c, setup, Q, Tr_hat_phiQ) :
             return True
         if e1 == 1/e2_squared:
             return True
-        print 'Pairing equation does not hold.'
+        print('Pairing equation does not hold.')
         return False
-    print 'e_Tr_hat_phiQ_P EQUALS 1'
+    print('e_Tr_hat_phiQ_P EQUALS 1')
     return False
 

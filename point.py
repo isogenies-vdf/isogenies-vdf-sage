@@ -80,7 +80,7 @@ class Point:
         if not(xn in Integers()) :
             xn = self.curve.Fp2(xn.polynomial().list())
         if not((xn**3+self.curve.a*xn**2 + xn).is_square()) :
-            print 'point on the twist'
+            print('point on the twist')
         x_w = xn + self.curve.a/3
         return self.curve.weierstrass().lift_x(x_w)
 
@@ -258,7 +258,7 @@ class Point:
         a1 = self.curve.Fp2(self.curve.a)
         if  (a**2 - 4) * (a1**2 - 3)**3 != (a1**2 - 4) * (a**2 - 3)**3:
             # i.e if  256*(a1**2 - 3)**3/(a1**2 - 4) != 256*(a**2 - 3)**3/(a**2 - 4)
-            print 'the curves are not isomorphic !'
+            print('the curves are not isomorphic !')
             return False
         E_a1 = EllipticCurve(self.curve.Fp2, [0,a1,0,1,0])
         E_a = EllipticCurve(self.curve.Fp2, [0,a,0,1,0])
@@ -321,7 +321,7 @@ class Point:
                 if n(100*PRINTCOUNTER/k) > DEC :
                     DEC += 10
                     if k>50 :
-						print floor(100*PRINTCOUNTER/k), '% of the (big) step'
+						print(floor(100*PRINTCOUNTER/k), '% of the (big) step')
                 F = list1[0].curve
                 if method == 'kernel4' :
                     listOfCurves_a.append(F)
@@ -383,7 +383,7 @@ class Point:
             #verbose for large computations
             if (l*10)//k < cpt and ZZ(self.curve.p).nbits() > 100 :
                 cpt = (l*10)//k
-                print (10 - cpt)*10, '%  of the isogeny'
+                print((10 - cpt)*10, '%  of the isogeny')
             image_points = P4.isogeny_degree4(image_points)
             if method == 'kernel4' :
                 listOfCurves_a.append(image_points[0].curve)
