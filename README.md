@@ -3,11 +3,15 @@
 https://eprint.iacr.org/2019/166.pdf
 
 # How to compute our VDF ?
-`sage vdf.py protocol method pSize nbIterations` where:
-- `protocol` is `fp` or `fp2`,
-- `method` is `kernel4` or `kernel4k`,
-- `pSize` is `p14-toy`, `p89-toy` or `p1506`,
-- `nbIterations` is an integer.
+`sage vdf.py`
+optional arguments:
+  -h, --help            show this help message and exit
+  --protocol PROTOCOL   choose the VDF protocol to use
+  --method METHOD       choose the method to store the setup walk
+  --pSize PSIZE         determine the size of the prime p to use
+  --nbIterations NBITERATIONS
+                        set the number of iterations of the VDF
+  -v, --verbose         increase output verbosity
 
 # Issues.
 
