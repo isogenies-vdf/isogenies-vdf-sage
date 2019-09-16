@@ -157,22 +157,24 @@ class Point:
             return Point(1, 0, self.curve)
         return R0
 
-    def is_order(self, k) :
-        if ZZ(k).is_prime() :
-            return (k*self).z == 0 and self.z != 0
-        if k == 1 :
-            if self.z == 0 :
-                return true
-            else :
-                return false
-        if k == 2**(valuation(k, 2)) :
-            l = valuation(k,2)
-            return ((2**l) * self).z == 0 and (((2**l)//2) * self).z != 0
-        if k == 4**(valuation(k, 4)) :
-            l = valuation(k,4)
-            return ((4**l) * self).z == 0 and (((4**l)//2) * self).z != 0
-        return "not implemented"
+    def is_power_of_2_order_point(self, k) :
+        '''
+        INPUT:
+        * k an integer
+        OUTPUT:
+        * True if self is of order 2^k, False else.
+        '''
+        return ((2**k) * self).z == 0 and (((2**k)//2) * self).z != 0
 
+    def is_prime_order_point(self, N) :
+        '''
+        INPUT:
+        * k an integer
+        OUTPUT:
+        * True if self is of order N, False else.
+        '''
+        return (k*self).z == 0 and self.z != 0
+        
     def get_P4(self, k) :
         '''
         INPUT:

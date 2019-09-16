@@ -15,7 +15,7 @@ def vdf_verif(curve, setup, Q, hat_phiQ) :
     #we just need P and phiP for the moment... [P, curve_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
     P, phiP = setup [0], setup[-1]
     
-    if not(hat_phiQ.in_curve() and hat_phiQ.is_order(curve.N)) :
+    if not(hat_phiQ.in_curve() and hat_phiQ.is_prime_order_point(curve.N)) :
         print('evaluation step does not give point of the curve of order N')
         return False
     

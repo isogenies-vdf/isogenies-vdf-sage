@@ -70,7 +70,7 @@ class Curve:
                 # we need to divide by 2 the cofactor because of the ZZ / 2 ZZ part above
                 cof = cof // 2
         R = cof * self.random_point(extension_field, twist)
-        while not(R.is_order(2**k)) :
+        while not(R.is_power_of_2_order_point(k)) :
             R = cof * self.random_point(extension_field, twist)
         return R
 
