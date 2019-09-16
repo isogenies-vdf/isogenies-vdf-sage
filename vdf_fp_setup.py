@@ -38,7 +38,7 @@ def isogeny_walk(curve, P, verbose, method) :
         #Attention, we need to choose the right direction ! With the twist, we go to j=0 or 1728 curve, and there is a problem with the formulas of 4-isogeny...
         P4k = curve_prime.point_order(4**k, 1, False)
         #Warning ! We do a 4**(k-1) isogeny !
-        [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k_strategy(ev_P, k, method, strategy=P4k.curve.strategy, stop=1)
+        [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k_strategy(ev_P, k, method, stop=1)
         kernelsOfBigSteps += [kernelDual]
         curvesPath += listOfCurves
         curve_prime = ev_P.curve

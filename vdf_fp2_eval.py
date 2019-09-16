@@ -29,7 +29,7 @@ def vdf_eval(c, setup, Q, verbose, method):
     if method == 'kernel4k' :
         for R in kernelsOfBigSteps :
             R = R.change_iso_curve(T.curve.a)
-            [T, kernelPoint, listOfCurves] = R.isogeny_degree4k_strategy(T, k, method='withoutKernel', strategy=R.curve.strategy)
+            [T, kernelPoint, listOfCurves] = R.isogeny_degree4k_strategy(T, k, method='withoutKernel')
     elif method == 'kernel4' :
         for c1 in curvesPath:
             R = Point(1, 1, c1).change_iso_curve(T.curve.a)

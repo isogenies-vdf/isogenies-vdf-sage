@@ -271,14 +271,13 @@ class Point:
         curve_target.a = a
         return Point(iso(P_ws)[0], 1, curve_target)
 
-    def isogeny_degree4k_strategy(self, Q, k, method, strategy, stop=0) :
+    def isogeny_degree4k_strategy(self, Q, k, method, stop=0) :
         '''
         INPUT:
         * self the point defining the kernel of the isogeny, of degree 4**k
         * Q a point that we want to evaluate
         * k such that the isogeny is of degree 4**k
         * method a string defining the method to use : withKernel4, withKernel4k or withoutKernel
-        * strategy a list of integers representing the stragegy for browsing the tree
         OUTPUT:
         * phiQ the image of Q
         * phiQ4k a point generating the dual isogeny kernel   (if method = 'kernel4k')
@@ -326,10 +325,10 @@ class Point:
                 if method == 'kernel4' :
                     listOfCurves_a.append(F)
                 l -=  1
-            elif strategy[i] > 0 and strategy[i] < h :
+            elif self.curve.strategy[i] > 0 and self.curve.strategy[i] < h :
                 Queue1.append([h, P])
-                P = 4**(strategy[i]) * P
-                Queue1.append([h-strategy[i], P])
+                P = 4**(self.curve.strategy[i]) * P
+                Queue1.append([h-self.curve.strategy[i], P])
                 i += 1
             else :
                 return false
