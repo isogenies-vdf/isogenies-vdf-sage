@@ -340,10 +340,10 @@ class Point:
             # the point defining the dual is the 3rd one of image_points evaluated by the 4-isogenies
             phiQ4k = list1[2]
         else :
-            phiQ4k = ''
+            phiQ4k = None
 
         if method != 'kernel4' :
-            listOfCurves_a = ''
+            listOfCurves_a = None
         return [phiQ, phiQ4k, listOfCurves_a]
 
     def isogeny_degree4k(self, Q, k, method, stop=0) :
@@ -396,9 +396,9 @@ class Point:
             # the point defining the dual is the 3rd one of image_points evaluated by the 4-isogenies
             phiQ4k = image_points[2]
         else :
-            phiQ4k = ''
+            phiQ4k = None
         
         if method != 'kernel4' :
-            listOfCurves_a = ''
+            listOfCurves_a = None
         
         return [phiQ, phiQ4k, listOfCurves_a]
