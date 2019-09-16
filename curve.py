@@ -56,16 +56,14 @@ class Curve:
             * R a point of the curve or its twist, of order 2**k, defined over \F_{p^k}, given in the Montgomery model
         '''
         if (k > self.n) :
-            print("there is no point of order 2^%d over Fp^%d" % (k, extension_field))
-            return False
+            raise RuntimeError('there is no point of order 2^%d over Fp^$d' % (k, extension_field))
         cof = (self.p+1) // (2**k)
 
         if extension_field == 1 :
             # As  E(Fp) \simeq ZZ / ((p+1)/2) ZZ \times ZZ / 2 ZZ
             # there is no point of order 2^curve.n
             if k == self.n :
-                print('impossible to get a point of order 2^%d over Fp' % k)
-                return False
+                raise RuntimeError('impossible to get a point of order 2^%d over Fp' % k)
             else :
                 # we need to divide by 2 the cofactor because of the ZZ / 2 ZZ part above
                 cof = cof // 2

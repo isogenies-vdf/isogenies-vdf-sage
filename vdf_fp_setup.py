@@ -21,8 +21,7 @@ def isogeny_walk(curve, P, verbose, method) :
     # q isogenies of degree 2^(n-2)=4^(n//2 - 1)    
     q = curve.Delta // (curve.n - 2)
     if curve.Delta % (2*curve.n-4) != 0 :
-        print('Delta is not a multiple of 2*(n-2)')
-        return False
+        raise RuntimeError('Delta is not a multiple of 2*(n-2)')
     
     #we use a n-1 order point to define a n-2 step, in order to stay on the cratere
     k = ZZ(curve.n-1)//2

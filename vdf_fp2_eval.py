@@ -16,8 +16,7 @@ def vdf_eval(c, setup, Q, verbose, method):
     '''
     [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
     if c.Delta % c.n != 0 :
-        print('Delta is not a multiple of n')
-        return False
+        raise RuntimeError('Delta is not a multiple of n')
     k = ZZ(c.n//2)
     
     T = Q

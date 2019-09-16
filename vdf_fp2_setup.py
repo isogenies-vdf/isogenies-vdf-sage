@@ -21,8 +21,7 @@ def isogeny_walk(curve, P, verbose, method) :
     # q isogenies of degree 2^n=4^(n//2)
     q = curve.Delta // curve.n
     if curve.Delta % curve.n != 0 :
-        print('Delta is not a multiple of n')
-        return False
+        raise Runtime('Delta is not a multiple of n')
 
     #we do 4-isogenies and not 2-isogenies
     k = ZZ(curve.n//2)

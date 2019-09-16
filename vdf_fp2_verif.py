@@ -14,16 +14,8 @@ def vdf_verif(c, setup, Q, Tr_hat_phiQ) :
     [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
     
     if not(Tr_hat_phiQ.in_curve() and Tr_hat_phiQ.x in c.Fp and Tr_hat_phiQ.z in c.Fp) :
-        print('evaluation step does not give point of the curve defined over Fp')
-        return False
+        raise RuntimeError('evaluation step does not give point of the curve defined over Fp')
     
-    #
-    #for R in Tr_hat_phiQ :
-    #    #if not(R.in_curve() and  R.x in c.Fp and R.z in c.Fp) :
-    #        #print('evaluation step does not give point of the curve defined over Fp')
-    #        #return False
-    #
-
     # this does not depend on the eval answer, can be computed before the eval
     P_ws = P.weierstrass()
     phiP_ws = phiP.weierstrass()

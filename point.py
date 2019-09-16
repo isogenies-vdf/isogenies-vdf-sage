@@ -260,8 +260,7 @@ class Point:
         a1 = self.curve.Fp2(self.curve.a)
         if  (a**2 - 4) * (a1**2 - 3)**3 != (a1**2 - 4) * (a**2 - 3)**3:
             # i.e if  256*(a1**2 - 3)**3/(a1**2 - 4) != 256*(a**2 - 3)**3/(a**2 - 4)
-            print('the curves are not isomorphic !')
-            return False
+            raise RuntimeError('the curves are not isomorphic.')
         E_a1 = EllipticCurve(self.curve.Fp2, [0,a1,0,1,0])
         E_a = EllipticCurve(self.curve.Fp2, [0,a,0,1,0])
         xP = self.x/self.z
