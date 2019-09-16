@@ -173,7 +173,7 @@ class Point:
         OUTPUT:
         * True if self is of order N, False else.
         '''
-        return (k*self).z == 0 and self.z != 0
+        return (N*self).z == 0 and self.z != 0
         
     def get_P4(self, k) :
         '''
