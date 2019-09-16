@@ -38,11 +38,11 @@ def isogeny_walk(curve, P, verbose, method) :
         if first : # we check the first step does not go to j=0 or 1728 curve
             j = 0
             while j == 0 or j == 1728 :
-                P4k = curve_prime.point_order(4**k, 2)
+                P4k = curve_prime.power_of_2_order_random_point(2*k, 2)
                 P4 = P4k.get_P4(k)
                 xP4 = P4.normalize().x
                 while xP4 == 1 or xP4 == -1 :
-                    P4k = curve_prime.point_order(4**k, 2)
+                    P4k = curve_prime.power_of_2_order_random_point(2*k, 2)
                     P4 = P4k.get_P4(k)
                     xP4 = P4.normalize().x
                 #assert isOrder4k(k, P4k, aprime)
@@ -50,11 +50,11 @@ def isogeny_walk(curve, P, verbose, method) :
                 j = curve_onestep.weierstrass().j_invariant()
             first = False
         else : # we ckeck that the step does not backtrack
-            P4k = curve_prime.point_order(4**k, 2)
+            P4k = curve_prime.power_of_2_order_random_point(2*k, 2)
             P4 = P4k.get_P4(k)
             xP4 = P4.normalize().x
             while xP4 == 1 or xP4 == -1 :
-                P4k = curve_prime.point_order(4**k, 2)
+                P4k = curve_prime.power_of_2_order_random_point(2*k, 2)
                 P4 = P4k.get_P4(k)
                 xP4 = P4.normalize().x
         [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k_strategy(ev_P, k, method)

@@ -241,7 +241,7 @@ class Point:
         P2 = 2*P4
         Q_subgroup = False
         while not(Q_subgroup) :
-            Q4k = self.curve.point_order(4**k)
+            Q4k = self.curve.power_of_2_order_random_point(2*k)
             Q4 = Q4k.get_P4(k)
             Q2 = 2*Q4
             Q_subgroup = (P2.x * Q2.z != Q2.x * P2.z and P2.x * Q2.z != - Q2.x * P2.z)

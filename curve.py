@@ -46,30 +46,45 @@ class Curve:
         '''
         return EllipticCurve(self.Fp2, [1-(self.a**2)/3, self.a*(2*(self.a**2)/9-1)/3])
 
-    def point_order(self, k, extension_field = 2, twist = False) :
-        if k == 2**(valuation(k,2)) :
-            l = valuation(k,2)
-            if (l > self.n) :
-                print("there is no point of order 2^%d over Fp^%d" % (l, extension_field))
+    def power_of_2_order_random_point(self, k, extension_field = 2, twist = False) :
+        '''
+            INPUT:
+            * k an integer
+            * extension_field an integer
+            * twist a boolean
+            OUTPUT:
+            * R a point of the curve or its twist, of order 2**k, defined over \F_{p^k}, given in the Montgomery model
+        '''
+        if (k > self.n) :
+            print("there is no point of order 2^%d over Fp^%d" % (k, extension_field))
+            return False
+        cof = (self.p+1) // (2**k)
+
+        if extension_field == 1 :
+            # As  E(Fp) \simeq ZZ / ((p+1)/2) ZZ \times ZZ / 2 ZZ
+            # there is no point of order 2^curve.n
+            if k == self.n :
+                print('impossible to get a point of order 2^%d over Fp' % k)
                 return False
-            cof = (self.p+1) // (2**l)
-            
-            if extension_field == 1 :
-                # As  E(Fp) \simeq ZZ / ((p+1)/2) ZZ \times ZZ / 2 ZZ
-                # there is no point of order 2^curve.n
-                if l == self.n :
-                    print('impossible to get a point of order 2^%d over Fp' % l)
-                    return False
-                else :
-                    # we need to divide by 2 the cofactor because of the ZZ / 2 ZZ part above
-                    cof = cof // 2
+            else :
+                # we need to divide by 2 the cofactor because of the ZZ / 2 ZZ part above
+                cof = cof // 2
+        R = cof * self.random_point(extension_field, twist)
+        while not(R.is_order(2**k)) :
             R = cof * self.random_point(extension_field, twist)
-            while not(R.is_order(2**l)) :
-                R = cof * self.random_point(extension_field, twist)
-        elif k == self.N :
-            R = self.cof_P * self.random_point(extension_field, twist)
-            while R.z == 0 :
-                R = self.cof_P * self.random_point(extension_field, twist)
+        return R
+
+    def pairing_group_random_point(self, extension_degree = 2, twist = False) :
+        '''
+        INPUT:
+        * extension_degree an integer
+        * twist a boolean
+        OUTPUT:
+        * a point of order self.N defined over self.Fp^extension_degree defined over the curve or its twist.
+        '''
+        R = self.cof_P * self.random_point(extension_degree, twist)
+        while R.z == 0 :
+            R = self.cof_P * self.random_point(extension_degree, twist)
         return R
 
     def getPointFromWeierstrass(self, P) :
