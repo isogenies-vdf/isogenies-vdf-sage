@@ -41,18 +41,7 @@ def vdf_verif(curve, setup, Q, hat_phiQ) :
             return True
         if e1 == 1/e2:
             return True
-        print('Pairing equation does not hold.')
+        # Pairing equation does not hold
         return False
-    print('e_Tr_hat_phiQ_P EQUALS 1')
-    
-
-
-
-
-
-    e_phiP_Q = TATE(setup[1], Q_ws, phiP_ws)
-    e_hat_phiQ_P = TATE(curve, hat_phiQ_ws, P_ws)
-    
-    assert e_phiP_Q == Q_ws.tate_pairing(phiP_ws, ZZ(curve.N), 2)
-    
-    return (e_phiP_Q == e_hat_phiQ_P or e_phiP_Q == 1/e_hat_phiQ_P) and e_phiP_Q != 1
+    # e_Tr_hat_phiQ_P = 1
+    return False

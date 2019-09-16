@@ -58,8 +58,8 @@ def vdf_verif(c, setup, Q, Tr_hat_phiQ) :
             return True
         if e1 == 1/e2_squared:
             return True
-        print('Pairing equation does not hold.')
+        # Pairing equation does not hold
         return False
-    print('e_Tr_hat_phiQ_P EQUALS 1')
+    # e_Tr_hat_phiQ_P = 1
     return False
 
