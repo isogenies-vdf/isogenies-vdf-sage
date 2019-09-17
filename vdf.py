@@ -90,7 +90,7 @@ setup = vdf_setup(c, verbose, method)
 time = cputime(time)
 print('setup timing: %.5f seconds.' % time)
 [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
-file.write("Setup:\t" + str(tt) + " seconds.\n")
+file.write("Setup:\t" + str(time) + " seconds.\n")
 
 #Generating a point Q
 #NOT IN THE SAME SUBGROUP AS phiP !!!
