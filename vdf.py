@@ -85,7 +85,7 @@ if protocol == 'fp' :
 else :
     from vdf_fp2_setup import *
 
-tt = cputime()
+time = cputime()
 setup = vdf_setup(c, verbose, method)
 time = cputime(time)
 print('setup timing: %.5f seconds.' % time)
@@ -109,7 +109,7 @@ if protocol == 'fp' :
 else :
     from vdf_fp2_eval import *
 
-tt = cputime()
+time = cputime()
 Tr_hat_phiQ = vdf_eval(c, setup, Q, verbose, method)
 time = cputime(time)
 print('eval timing: %.5f seconds.' % time)
@@ -121,7 +121,7 @@ if protocol == 'fp' :
 else :
     from vdf_fp2_verif import *
 
-tt = cputime()
+time = cputime()
 ver = vdf_verif(c, setup, Q, Tr_hat_phiQ)
 time = cputime(time)
 print('verif timing: %.5f seconds.' % time)
