@@ -387,7 +387,7 @@ class Point:
         #Attention, we need to choose the right direction ! With the twist, we go to j=0 or 1728 curve, and there is a problem with the formulas of 4-isogeny...
         P4k = curve_prime.power_of_2_order_random_point(2*k, 1, False)
         #Warning ! We do a 4**(k-1) isogeny !
-        [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k_strategy(ev_P, k, method, stop=1)
+        [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k(ev_P, k, method, strategy=???, stop=1)
         if not(kernelDual is None) :
             kernelsOfBigSteps += [kernelDual]
         if not(listOfCurves is None) :

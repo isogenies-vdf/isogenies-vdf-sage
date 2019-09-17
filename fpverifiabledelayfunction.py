@@ -13,7 +13,7 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
             Delta += 1
         self.delay = Delta
 
-    def setup(curve, verbose, method) :
+    def setup(self, curve, verbose, method) :
         '''
         INPUT:
         * curve the initial elliptic curve
@@ -30,7 +30,7 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
             P = curve.cof_P * curve.random_point(1, True)
         return [P] + isogeny_walk(curve, P, verbose, method)
 
-    def eval(c, setup, Q, verbose, method):
+    def evaluate(self, c, setup, Q, verbose, method):
         '''
         INPUT:
         * c the initial elliptic curve
@@ -51,7 +51,7 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
         if method == 'kernel4k' :
             for R in kernelsOfBigSteps :
                 R = R.change_iso_curve(c_t.a)
-                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k_strategy(T, k, method='withoutKernel', stop=1)
+                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', self.strategy, stop=1)
                 c_t = T.curve
         elif method == 'kernel4' :
             cpt = 0
@@ -62,7 +62,7 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
             cpt += 1
         return T.change_iso_curve(c.a)
 
-    def verif(curve, setup, Q, hat_phiQ) :
+    def verify(self, curve, setup, Q, hat_phiQ) :
         '''
         INPUT:
         * curve the elliptic curve

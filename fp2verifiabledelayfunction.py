@@ -31,7 +31,7 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
             P = curve.cof_P * curve.random_point(1, True)
         return [P] + isogeny_walk(curve, P, verbose, method)
 
-    def vdf_eval(c, setup, Q, verbose, method): #CHANGE ARGUMENTS!
+    def evaluate(self, c, setup, Q, verbose, method): #CHANGE ARGUMENTS!
         '''
         INPUT:
         * c the elliptic curve
@@ -56,7 +56,7 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
         if method == 'kernel4k' :
             for R in kernelsOfBigSteps :
                 R = R.change_iso_curve(T.curve.a)
-                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k_strategy(T, k, method='withoutKernel')
+                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', self.strategy)
         elif method == 'kernel4' :
             for c1 in curvesPath:
                 R = Point(1, 1, c1).change_iso_curve(T.curve.a)
@@ -78,7 +78,7 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
         #the (+/-) point to return is the one defined over Fp :-)
         return c.getPointFromWeierstrass(R1) if R1[0] in c.Fp and R1[1] in c.Fp else c.getPointFromWeierstrass(R2)
 
-    def vdf_verif(c, setup, Q, Tr_hat_phiQ) :
+    def verify(self, c, setup, Q, Tr_hat_phiQ) :
         '''
         INPUT:
         * c the elliptic curve
