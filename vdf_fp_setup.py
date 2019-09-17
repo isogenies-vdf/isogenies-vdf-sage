@@ -38,8 +38,10 @@ def isogeny_walk(curve, P, verbose, method) :
         P4k = curve_prime.power_of_2_order_random_point(2*k, 1, False)
         #Warning ! We do a 4**(k-1) isogeny !
         [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k_strategy(ev_P, k, method, stop=1)
-        kernelsOfBigSteps += [kernelDual]
-        curvesPath += listOfCurves
+        if not(kernelDual is None) :
+            kernelsOfBigSteps += [kernelDual]
+        if not(listOfCurves is None) :
+            curvesPath += listOfCurves
         curve_prime = ev_P.curve
     phiP = ev_P
     curvesPath = curvesPath[::-1]
