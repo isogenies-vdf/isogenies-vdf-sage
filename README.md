@@ -2,6 +2,9 @@
 
 https://eprint.iacr.org/2019/166.pdf
 
+# WARNING
+This version is not working for the moment !
+
 # How to compute our VDF ?
 `sage vdf.py --protocol PROTOCOL --method METHOD --pSize PSIZE --nbIterations NBITERATIONS`
 where:

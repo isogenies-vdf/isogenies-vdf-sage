@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*- 
 import point
 from sage.rings.finite_rings.finite_field_constructor import GF
-from sage.arith.misc import valuation
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 
 class Curve:
-    def __init__(self, f, n, N, a, ext, Delta, strategy):
+    def __init__(self, f, n, N, a, ext):
         self.f = f
         self.n = n
         self.N = N
@@ -14,9 +13,7 @@ class Curve:
         self.Fpx = self.Fp['x']; x = self.Fpx.gen()
         self.Fp2 = self.Fp.extension(x**2+ext, 'u')
         self.a = self.Fp2(a)
-        self.Delta = Delta
         self.cof_P = (self.p+1)//self.N
-        self.strategy = strategy
 
     def __repr__(self):
         return 'Montgomery curve defined by y^2 = x^3 + (' + repr(self.a) + ')*x^2 + x over ' + repr(self.Fp2)
@@ -99,23 +96,3 @@ class Curve:
             return point.Point(P[0] - self.a/3, 1, self)
         X, Y, Z = P[0]/P[2], P[1]/P[2], 1
         return self.getPointFromWeierstrass([X,Y,Z])
-
-    @staticmethod
-    def strategy(n, p, q):
-        '''
-        INPUT:
-        * n the height of the tree
-        * p the cost of one multiplication step
-        * q the cost of one isogeny step
-        OUTPUT:
-        * a list corresponding to a strategy
-        REMARK:
-        from Luca De Feo's answer on crypto.stackexchange.com
-        '''
-        S = { 1: [] }
-        C = { 1: 0 }
-        for i in range(2, n+2):
-            b, cost = min(((b, C[i-b] + C[b] + b*p + (i-b)*q) for b in range(1,i)), key=lambda t: t[1])
-            S[i] = [b] + S[i-b] + S[b]
-            C[i] = cost
-        return S[n+1]
