@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- 
-from sage.all import *
 import curve
+from sage.rings.finite_rings.finite_field_constructor import GF
+from sage.rings.integer_ring import ZZ
 
 def eval_line(R, P, Q) :
     """

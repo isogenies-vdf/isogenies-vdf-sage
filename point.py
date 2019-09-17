@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
-from sage.all import *
+import sage.all
 import curve
+from sage.rings.integer_ring import ZZ
+from sage.arith.misc import valuation
+from copy import copy
 from collections import deque
 from sage.schemes.elliptic_curves.weierstrass_morphism import WeierstrassIsomorphism
+from sage.misc.functional import numerical_approx
+from sage.schemes.elliptic_curves.constructor import EllipticCurve
+from sage.functions.other import sqrt
 
 class Point:
     def __init__(self, x, z, c):
@@ -77,7 +83,7 @@ class Point:
             return self.curve.weierstrass()([0,1,0])
         xn = x/z
         # sage does not like finite fiels
-        if not(xn in Integers()) :
+        if not(xn in ZZ) :
             xn = self.curve.Fp2(xn.polynomial().list())
         if not((xn**3+self.curve.a*xn**2 + xn).is_square()) :
             print('point on the twist')
@@ -318,7 +324,7 @@ class Point:
                 Queue1 = Queue2
                 list1 = P.isogeny_degree4(list1)
                 PRINTCOUNTER+=1
-                if n(100*PRINTCOUNTER/k) > DEC :
+                if numerical_approx(100*PRINTCOUNTER/k) > DEC :
                     DEC += 10
                     if k>50 :
 						print('%d\% of the (big) step' % floor(100*PRINTCOUNTER/k))
