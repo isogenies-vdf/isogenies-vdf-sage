@@ -56,7 +56,7 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
         if method == 'kernel4k' :
             for R in kernelsOfBigSteps :
                 R = R.change_iso_curve(T.curve.a)
-                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', self.strategy)
+                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', strategy=self.strategy)
         elif method == 'kernel4' :
             for c1 in curvesPath:
                 R = Point(1, 1, c1).change_iso_curve(T.curve.a)
