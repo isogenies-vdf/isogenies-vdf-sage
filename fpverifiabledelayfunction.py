@@ -7,7 +7,11 @@ from verifiabledelayfunction import VerifiableDelayFunction
 
 class FpVerifiableDelayFunction(VerifiableDelayFunction):
     def __init__(self, method, strategy, curve, delay):
-        super().__init__(method, strategy, curve, delay)
+        #change it with super().__init__(method, strategy, curve, delay)
+        # For the moment, python3 does not work...
+        self.method = method
+        self.strategy = strategy
+        self.curve = curve
         Delta = delay
         while Delta % (curve.n-2) != 0 or (Delta // (curve.n-2)) % 2 != 0:
             Delta += 1
