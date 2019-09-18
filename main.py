@@ -77,7 +77,7 @@ print(VDF)
 
 print("ok2")
 
-
+print VDF.setup(c, verbose, method)
 
 
 
