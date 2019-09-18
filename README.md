@@ -6,7 +6,7 @@ https://eprint.iacr.org/2019/166.pdf
 This version is not working for the moment !
 
 # How to compute our VDF ?
-`sage vdf.py --protocol PROTOCOL --method METHOD --pSize PSIZE --nbIterations NBITERATIONS`
+`sage -python3 vdf.py --protocol PROTOCOL --method METHOD --pSize PSIZE --nbIterations NBITERATIONS`
 where:
 - `PROTOCOL` is `fp` or `fp2`
 - `METHOD` is `kernel4k` or `kernel4`
