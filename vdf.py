@@ -61,36 +61,22 @@ else :
         Delta += 1
 print('Delta = %d' % Delta)
 
-c = curve.Curve(f, n, N, a, alpha, Delta, strategy)
+c = curve.Curve(f, n, N, a, alpha)
 
-if protocol == 'fp' :
-    # for the Fp protocol, choose Delta = (n-2) * evenNumber
-    assert c.Delta % (c.n - 2) == 0
-    assert (c.Delta // (c.n - 2)) % 2 == 0
-else :
-    # for the Fp2 protocol, choose Delta = n * number
-    assert c.Delta % c.n == 0
-    assert (c.Delta // c.n) % 2 == 0
+print(c)
 
-file = open("timing_" + protocol + "_" + method + "_" + pSize + "_" + str(c.Delta) + "steps.txt", "a")
+from fpverifiabledelayfunction import FpVerifiableDelayFunction
 
-file.write("VDF over " + protocol + " with log_2(p) = " + str(ZZ(c.p).nbits()) + " and log_2(T) = " + str(ZZ(c.Delta).nbits()) + ".\n")
-if method == 'kernel4' :
-    file.write('Points of [4]-torsion stored.\n\n')
-elif method == 'kernel4k' :
-    file.write('Points of [4^k]-torsion stored.\n\n')
+VDF = FpVerifiableDelayFunction(method, c, strategy, Delta)
 
-if protocol == 'fp' :
-    from vdf_fp_setup import *
-else :
-    from vdf_fp2_setup import *
+print(VDF)
+
 
 time = cputime()
-setup = vdf_setup(c, verbose, method)
+setup = setup(c, verbose, method)
 time = cputime(time)
 print('setup timing: %.5f seconds.' % time)
 [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
-file.write("Setup:\t" + str(time) + " seconds.\n")
 
 #Generating a point Q
 #NOT IN THE SAME SUBGROUP AS phiP !!!
@@ -104,38 +90,20 @@ while e_phiP_Q == 1 :
     e_phiP_Q = Q_ws.weil_pairing(phiP_ws, ZZ(c_prime.N))
 
 #EVAL
-if protocol == 'fp' :
-    from vdf_fp_eval import *
-else :
-    from vdf_fp2_eval import *
-
 time = cputime()
-Tr_hat_phiQ = vdf_eval(c, setup, Q, verbose, method)
+Tr_hat_phiQ = evaluate(c, setup, Q, verbose, method)
 time = cputime(time)
 print('eval timing: %.5f seconds.' % time)
-file.write('Eval:\t'+ str(time) + ' seconds.\n')
 
 #VERIFY
-if protocol == 'fp' :
-    from vdf_fp_verif import *
-else :
-    from vdf_fp2_verif import *
-
 time = cputime()
-ver = vdf_verif(c, setup, Q, Tr_hat_phiQ)
+ver = verify(c, setup, Q, Tr_hat_phiQ)
 time = cputime(time)
 print('verif timing: %.5f seconds.' % time)
-file.write('Verif:\t' + str(time) + ' seconds.\n')
 print('###############')
 if ver :
     print('#verif OK  :-)#')
-    file.write('verif ok\n')
 else :
     print('#verif nOK :-(#')
-    file.write('verif nok\n')
-    file.write("setup = " + str(setup)+ "\n")
-    file.write("Tr_hat_phiQ = " + str(Tr_hat_phiQ) + "\n")
 print('###############')
 
-file.write("\n")
-file.close()
