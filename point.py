@@ -333,10 +333,10 @@ class Point:
                 if method == 'kernel4' :
                     listOfCurves_a.append(F)
                 l -=  1
-            elif self.curve.strategy[i] > 0 and self.curve.strategy[i] < h :
+            elif strategy[i] > 0 and strategy[i] < h :
                 Queue1.append([h, P])
-                P = 4**(self.curve.strategy[i]) * P
-                Queue1.append([h-self.curve.strategy[i], P])
+                P = 4**(strategy[i]) * P
+                Queue1.append([h-strategy[i], P])
                 i += 1
             else :
                 return false
@@ -353,7 +353,7 @@ class Point:
             listOfCurves_a = None
         return [phiQ, phiQ4k, listOfCurves_a]
 
-    def isogeny_walk(self, nbSteps, strategy, method) :
+    def isogeny_walk(self, nbSteps, strategy, method, protocol) :
         '''
         INPUT:
         * nbSteps the number of steps in the 2-isogeny walk
@@ -367,23 +367,30 @@ class Point:
         * Do not walk to the j=0,1728 curve at first step! The formulas of [4]-isogenies for these curves do not work for the moment.
         '''
 
-        # For the moment we use a delay that is a multiple of n.
-        assert nbSteps % self.curve.n == 0
-        #we use a 2**(n-1) order point to define a (n-2) step, in order to stay on the cratere
-        k = ZZ(curve.n-1)//2
+        # On the Fp2 case, we do (nbSteps/n) isogenies of degree 2^n.
+        # On the Fp case, we can get only points of order 2^(n-1) and in order
+        # to not go to the floor, we stop at before the last step so that we 
+        # stay on the cratere.
 
-        ev_P = P
+        if protocol == 'fp' :
+            nbBigSteps = nbSteps // (self.curve.n-2)
+            k = (self.curve.n - 1)//2
+        else :
+            nbBigSteps = nbSteps // (self.curve.n)
+            k = self.curve.n // 2
+
+        ev_P = self
         curvesPath = []
         kernelsOfBigSteps = []
 
-        curve_prime = copy(curve)
+        curve_prime = copy(self.curve)
 
-        for i in range(q) :
+        for i in range(nbBigSteps) :
             #P4k defines the kernel of the isogeny
             #Attention, we need to choose the right direction ! With the twist, we go to j=0 or 1728 curve, and there is a problem with the formulas of 4-isogeny...
             P4k = curve_prime.power_of_2_order_random_point(2*k, 1, False)
             #Warning ! We do a 4**(k-1) isogeny !
-            [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k(ev_P, k, method, strategy=???, stop=1)
+            [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k(ev_P, k, method, strategy, stop=1)
             if not(kernelDual is None) :
                 kernelsOfBigSteps += [kernelDual]
             if not(listOfCurves is None) :

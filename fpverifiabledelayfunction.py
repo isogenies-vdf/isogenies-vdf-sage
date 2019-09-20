@@ -32,9 +32,9 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
         P = curve.cof_P * curve.random_point(1, True)
         while P.z == 0 :
             P = curve.cof_P * curve.random_point(1, True)
-        return [P] + isogeny_walk(curve, P, verbose, method)
+        return [P] + P.isogeny_walk(self.delay, self.strategy, self.method, 'fp')
 
-    def evaluate(self, c, setup, Q, verbose, method):
+    def evaluate(self, c, setup, Q, method):
         '''
         INPUT:
         * c the initial elliptic curve
@@ -46,7 +46,7 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
         * hat_phiQ the image of Q by the dual walk
         '''
         [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
-        if c.Delta % (c.n-2) != 0 :
+        if self.delay % (c.n-2) != 0 :
             raise RuntimeError('Delta is not a multiple of n-2')
         k = ZZ((c.n-2)//2)
         T = Q

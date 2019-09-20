@@ -56,8 +56,6 @@ Delta = nbIterations
 
 c = curve.Curve(f, n, N, a, alpha)
 
-print('ok')
-
 """file = open("timing_" + protocol + "_" + method + "_" + pSize + "_" + str(c.Delta) + "steps.txt", "a")
 
 file.write("VDF over " + protocol + " with log_2(p) = " + str(ZZ(c.p).nbits()) + " and log_2(T) = " + str(ZZ(c.Delta).nbits()) + ".\n")
@@ -73,20 +71,13 @@ import fp2verifiabledelayfunction
 
 VDF = fpverifiabledelayfunction.FpVerifiableDelayFunction(method, strategy, c, Delta)
 
-print(VDF)
-
-print("ok2")
-
-print VDF.setup(c, verbose, method)
-
-
-
 time = cputime()
-setup = vdf_setup(c, verbose, method)
+SETUP = VDF.setup(c, verbose, method)
 time = cputime(time)
 print('setup timing: %.5f seconds.' % time)
-[P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
-file.write("Setup:\t" + str(time) + " seconds.\n")
+[P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = SETUP
+"""file.write("Setup:\t" + str(time) + " seconds.\n")
+"""
 
 #Generating a point Q
 #NOT IN THE SAME SUBGROUP AS phiP !!!
@@ -101,27 +92,33 @@ while e_phiP_Q == 1 :
 
 #EVAL
 time = cputime()
-Tr_hat_phiQ = vdf_eval(c, setup, Q, verbose, method)
+Tr_hat_phiQ = VDF.evaluate(c, SETUP, Q, method)
 time = cputime(time)
 print('eval timing: %.5f seconds.' % time)
-file.write('Eval:\t'+ str(time) + ' seconds.\n')
+"""file.write('Eval:\t'+ str(time) + ' seconds.\n')
+"""
 
 #VERIFY
 time = cputime()
-ver = vdf_verif(c, setup, Q, Tr_hat_phiQ)
+ver = VDF.verify(c, SETUP, Q, Tr_hat_phiQ)
 time = cputime(time)
 print('verif timing: %.5f seconds.' % time)
-file.write('Verif:\t' + str(time) + ' seconds.\n')
+"""file.write('Verif:\t' + str(time) + ' seconds.\n')
+"""
+
 print('###############')
 if ver :
     print('#verif OK  :-)#')
-    file.write('verif ok\n')
+    """file.write('verif ok\n')
+    """
 else :
     print('#verif nOK :-(#')
-    file.write('verif nok\n')
+    """file.write('verif nok\n')
     file.write("setup = " + str(setup)+ "\n")
     file.write("Tr_hat_phiQ = " + str(Tr_hat_phiQ) + "\n")
+    """
 print('###############')
 
-file.write("\n")
+"""file.write("\n")
 file.close()
+"""
