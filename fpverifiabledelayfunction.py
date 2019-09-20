@@ -17,70 +17,61 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
             Delta += 1
         self.delay = Delta
 
-    def setup(self, curve, verbose, method) :
+    def setup(self) :
         '''
-        INPUT:
-        * curve the initial elliptic curve
-        * verbose for the comments
-        * method for the method of storing the isogeny (kernel4, kernel4k or withoutKernel)
         OUTPUT:
         * P the first point of the protocol
         * the ouput of isogeny_walk
         '''
 
         # point P of order N
-        P = curve.cof_P * curve.random_point(1, True)
+        P = self.curve.cof_P * self.curve.random_point(1, True)
         while P.z == 0 :
-            P = curve.cof_P * curve.random_point(1, True)
+            P = self.curve.cof_P * self.curve.random_point(1, True)
         return [P] + P.isogeny_walk(self.delay, self.strategy, self.method, 'fp')
 
-    def evaluate(self, c, setup, Q, method):
+    def evaluate(self, Q, curvesPath, kernelsOfBigSteps):
         '''
         INPUT:
-        * c the initial elliptic curve
-        * setup the setup from vdf_setup function
         * Q the second point of the protocol
-        * verbose
-        * method for the method of storing the isogeny (kernel4, kernel4k or withoutKernel)
+        * curvesPath from the setup
+        * kernelsOfBigSteps from the setup
         OUTPUT:
         * hat_phiQ the image of Q by the dual walk
         '''
-        [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
-        if self.delay % (c.n-2) != 0 :
-            raise RuntimeError('Delta is not a multiple of n-2')
-        k = ZZ((c.n-2)//2)
-        T = Q
-        c_t = copy(c_prime)
 
-        if method == 'kernel4k' :
+        if self.delay % (self.curve.n-2) != 0 :
+            raise RuntimeError('Delta is not a multiple of n-2')
+        k = ZZ((self.curve.n-2)//2)
+        T = Q
+        c_t = copy(Q.curve)
+
+        if self.method == 'kernel4k' :
             for R in kernelsOfBigSteps :
                 R = R.change_iso_curve(c_t.a)
-                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', strategy=self.strategy, stop=1)
+                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, 'withoutKernel', self.strategy, stop=1)
                 c_t = T.curve
-        elif method == 'kernel4' :
+        elif self.method == 'kernel4' :
             cpt = 0
             for c1 in curvesPath :
                 R = Point(1,1,c1).change_iso_curve(c_t.a)
                 [T] = R.isogeny_degree4([T])
                 c_t = T.curve
             cpt += 1
-        return T.change_iso_curve(c.a)
+        return T.change_iso_curve(self.curve.a)
 
-    def verify(self, curve, setup, Q, hat_phiQ) :
+    def verify(self, P, phiP, Q, hat_phiQ) :
         '''
         INPUT:
-        * curve the elliptic curve
-        * setup the setup from the vdf_setup function
+        * P the first point of the protocol
+        * phiP the image of P
         * Q the second point of the protocol
         * hat_phiQ dual image of Q
         OUTPUT:
         * true/false depending on the verification
         '''
 
-        #we just need P and phiP for the moment... [P, curve_prime, curvesPath, kernelsOfBigSteps, phiP] = setup
-        P, phiP = setup [0], setup[-1]
-
-        if not(hat_phiQ.in_curve() and hat_phiQ.is_prime_order_point(curve.N)) :
+        if not(hat_phiQ.in_curve() and hat_phiQ.is_prime_order_point(self.curve.N)) :
             raise RuntimeError('evaluation step does not give point of the curve of order N')
 
         # this does not depend on the eval answer, and can be computed before the eval
@@ -90,11 +81,11 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
         Q_ws = Q.weierstrass()
         hat_phiQ_ws = hat_phiQ.weierstrass()
 
-        _Z, mil11 = pairing.miller(hat_phiQ_ws, P_ws, ZZ(curve.N), denominator=False)
-        e1 = pairing.exponentiation(curve, mil11[0]/mil11[1])
+        _Z, mil11 = pairing.miller(hat_phiQ_ws, P_ws, ZZ(self.curve.N), denominator=False)
+        e1 = pairing.exponentiation(self.curve, mil11[0]/mil11[1])
 
-        _Z, mil22 = pairing.miller(Q_ws, phiP_ws, ZZ(curve.N), denominator=False)
-        e2 = pairing.exponentiation(curve, mil22[0]/mil22[1])
+        _Z, mil22 = pairing.miller(Q_ws, phiP_ws, ZZ(self.curve.N), denominator=False)
+        e2 = pairing.exponentiation(self.curve, mil22[0]/mil22[1])
 
         if e1 != 1 :
             if e1 == e2 :

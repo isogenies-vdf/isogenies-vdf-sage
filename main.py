@@ -72,7 +72,7 @@ import fp2verifiabledelayfunction
 VDF = fpverifiabledelayfunction.FpVerifiableDelayFunction(method, strategy, c, Delta)
 
 time = cputime()
-SETUP = VDF.setup(c, verbose, method)
+SETUP = VDF.setup()
 time = cputime(time)
 print('setup timing: %.5f seconds.' % time)
 [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = SETUP
@@ -92,7 +92,7 @@ while e_phiP_Q == 1 :
 
 #EVAL
 time = cputime()
-Tr_hat_phiQ = VDF.evaluate(c, SETUP, Q, method)
+Tr_hat_phiQ = VDF.evaluate(Q, curvesPath, kernelsOfBigSteps)
 time = cputime(time)
 print('eval timing: %.5f seconds.' % time)
 """file.write('Eval:\t'+ str(time) + ' seconds.\n')
@@ -100,7 +100,7 @@ print('eval timing: %.5f seconds.' % time)
 
 #VERIFY
 time = cputime()
-ver = VDF.verify(c, SETUP, Q, Tr_hat_phiQ)
+ver = VDF.verify(P, phiP, Q, Tr_hat_phiQ)
 time = cputime(time)
 print('verif timing: %.5f seconds.' % time)
 """file.write('Verif:\t' + str(time) + ' seconds.\n')
