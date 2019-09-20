@@ -54,7 +54,7 @@ class Curve:
             * R a point of the curve or its twist, of order 2**k, defined over \F_{p^k}, given in the Montgomery model
         '''
         if (k > self.n) :
-            raise RuntimeError('there is no point of order 2^%d over Fp^$d' % (k, extension_field))
+            raise RuntimeError('there is no point of order 2^%d over Fp^%d' % (k, extension_field))
         cof = (self.p+1) // (2**k)
 
         if extension_field == 1 :
