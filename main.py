@@ -80,6 +80,8 @@ print('setup timing: %.5f seconds.' % time)
 [P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = SETUP
 """file.write("Setup:\t" + str(time) + " seconds.\n")
 """
+for cc in curvesPath :
+    print(cc)
 
 #Generating a point Q
 #NOT IN THE SAME SUBGROUP AS phiP !!!

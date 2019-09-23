@@ -19,7 +19,7 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
 
     def setup(self) :
         P = self.curve.pairing_group_random_point(extension_degree=1, twist=True)
-        return [P] + P.isogeny_walk(self.delay, self.strategy, self.method, 'fp')
+        return [P] + P.random_isogeny_walk(self.delay, 1,  self.strategy, 1 ,self.method)
 
     def evaluate(self, Q, curvesPath, kernelsOfBigSteps):
         '''
@@ -30,26 +30,7 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
         OUTPUT:
         * hat_phiQ the image of Q by the dual walk
         '''
-
-        if self.delay % (self.curve.n-2) != 0 :
-            raise RuntimeError('Delta is not a multiple of n-2')
-        k = ZZ((self.curve.n-2)//2)
-        T = Q
-        c_t = copy(Q.curve)
-
-        if self.method == 'kernel4k' :
-            for R in kernelsOfBigSteps :
-                R = R.change_iso_curve(c_t.a)
-                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, 'withoutKernel', self.strategy, stop=1)
-                c_t = T.curve
-        elif self.method == 'kernel4' :
-            cpt = 0
-            for c1 in curvesPath :
-                R = Point(1,1,c1).change_iso_curve(c_t.a)
-                [T] = R.isogeny_degree4([T])
-                c_t = T.curve
-            cpt += 1
-        return T.change_iso_curve(self.curve.a)
+        return Q.isogeny_walk(curvesPath, kernelsOfBigSteps, self.strategy)
 
     def verify(self, P, phiP, Q, hat_phiQ) :
         '''

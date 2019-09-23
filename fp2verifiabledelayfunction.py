@@ -20,7 +20,7 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
 
     def setup(self):
         P = self.curve.pairing_group_random_point(extension_degree=1, twist=True)
-        return [P] + P.isogeny_walk(self.delay, self.strategy, self.method, 'fp2')
+        return [P] + P.random_isogeny_walk(self.delay, 2, self.strategy, 0, self.method)
 
     def evaluate(self, Q, curvesPath, kernelsOfBigSteps):
         '''
@@ -31,28 +31,9 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
         OUTPUT:
         * Tr_hat_phiQ the list of the possible images of Q by the dual walk composed by Trace (4 possible because of sign pb)
         '''
-
         if self.delay % self.curve.n != 0 :
             raise RuntimeError('Delta is not a multiple of n')
-        k = ZZ(self.curve.n//2)
-        T = Q
-        c_t = copy(Q.curve)
-
-        # At the moment, isogeny codomain is "up to isomorphism".
-        # From the kernels given in setup, I need to move them into the right curve.
-        # That is why `kernel4` is not efficient (change_iso_curve times the number
-        # of steps in the walk on the graph. In kernel4k, it is reduced by a factor
-        # 1000.
-        if method == 'kernel4k' :
-            for R in kernelsOfBigSteps :
-                R = R.change_iso_curve(T.curve.a)
-                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', strategy=self.strategy)
-        elif method == 'kernel4' :
-            for c1 in curvesPath:
-                R = Point(1, 1, c1).change_iso_curve(T.curve.a)
-                [T] = R.isogeny_degree4([T])
-
-        T = T.change_iso_curve(self.curve.a)
+        T = Q.isogeny_walk(curvesPath, kernelsOfBigSteps, self.strategy)
         #T = hatphi(Q)
 
         #Trace trick

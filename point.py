@@ -289,7 +289,7 @@ class Point:
         OUTPUT:
         * phiQ the image of Q
         * phiQ4k a point generating the dual isogeny kernel   (if method = 'kernel4k')
-        * listOfCurves the list of 4-isogenous curvesq        (if method = 'kernel4')
+        * listOfCurves the list of 4-isogenous curves         (if method = 'kernel4')
         REMARKS:
         * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
         '''
@@ -299,7 +299,7 @@ class Point:
         curve_prime = copy(self.curve)
         image_points = [Q] + [self]
 
-        listOfCurves_a = []
+        listOfCurves = []
 
         if method == 'kernel4k':
             Q4k = self.dual_kernel_point(k)
@@ -331,7 +331,7 @@ class Point:
                         print('%d\% of the (big) step' % floor(100*PRINTCOUNTER/k))
                 F = list1[0].curve
                 if method == 'kernel4' :
-                    listOfCurves_a.append(F)
+                    listOfCurves.append(F)
                 l -=  1
             elif strategy[i] > 0 and strategy[i] < h :
                 Queue1.append([h, P])
@@ -339,7 +339,7 @@ class Point:
                 Queue1.append([h-strategy[i], P])
                 i += 1
             else :
-                return false
+                return False
         #output
         phiQ = list1[0]
 
@@ -350,36 +350,31 @@ class Point:
             phiQ4k = None
 
         if method != 'kernel4' :
-            listOfCurves_a = None
-        return [phiQ, phiQ4k, listOfCurves_a]
+            listOfCurves = None
+        return [phiQ, phiQ4k, listOfCurves]
 
-    def isogeny_walk(self, nbSteps, strategy, method, protocol) :
+    def random_isogeny_walk(self, steps, extensionDegree, strategy, stop, method) :
         '''
         INPUT:
-        * nbSteps the number of steps in the 2-isogeny walk
+        * steps the number of steps in the 2-isogeny walk
+        * extensionDegree for the extension of the field where we choose points for the walk
+        * stop an integer useful for isogeny_degree_4k
         * strategy the strategy to compute a 4^k isogeny (hardcoded in our case)
         * method for the method of storing the isogeny (kernel4, kernel4k or withoutKernel)
         OUTPUT:
         * curve_prime the final elliptic curve of the protocol
-        * final_hat_phi the list of the dual of 4 (or 4^k)-isogenies kernels for the inverse walk, with the curves associated
+        * curvesPath the list of the curves during the walk
+        * kernelsOfBigSteps the list of the kernels of the backtrack isogenies (of degree 4 or 4^k depending on the methdo)
         * phiP the image point of P by the isogeny
         REMARK:
         * Do not walk to the j=0,1728 curve at first step! The formulas of [4]-isogenies for these curves do not work for the moment.
         '''
 
-        # On the Fp2 case, we do (nbSteps/n) isogenies of degree 2^n.
-        # On the Fp case, we can get only points of order 2^(n-1) and in order
-        # to not go to the floor, we stop at before the last step so that we 
-        # stay on the cratere.
-
-        if protocol == 'fp' :
-            nbBigSteps = nbSteps // (self.curve.n-2)
-            k = (self.curve.n - 1)//2
-            extension_degree = 1
-        else :
-            nbBigSteps = nbSteps // (self.curve.n)
-            k = self.curve.n // 2
-            extension_degree = 2
+        # Suppose that the strategy let us compute an isogeny of degree 4^k
+        k = len(strategy) + 1 - stop
+        # We need to do steps/k big steps
+        assert steps % k == 0
+        nbBigSteps = steps // k
 
         ev_P = self
         curvesPath = []
@@ -388,11 +383,12 @@ class Point:
         curve_prime = copy(self.curve)
 
         for i in range(nbBigSteps) :
-            #P4k defines the kernel of the isogeny
-            #Attention, we need to choose the right direction ! With the twist, we go to j=0 or 1728 curve, and there is a problem with the formulas of 4-isogeny...
-            P4k = curve_prime.power_of_2_order_random_point(2*k, extension_degree, False)
-            #Warning ! We do a 4**(k-1) isogeny !
-            [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k(ev_P, k, method, strategy, stop=1)
+            # P4k defines the kernel of the isogeny
+            # Attention, we need to choose the right direction !
+            # With the twist, we go to j=0 or 1728 curve, and there is a
+            # problem with the formulas of 4-isogeny...
+            P4k = curve_prime.power_of_2_order_random_point(2*k, extensionDegree, False)
+            [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k(ev_P, k, method, strategy, stop)
             if not(kernelDual is None) :
                 kernelsOfBigSteps += [kernelDual]
             if not(listOfCurves is None) :
@@ -402,3 +398,25 @@ class Point:
         curvesPath = curvesPath[::-1]
         kernelsOfBigSteps = kernelsOfBigSteps[::-1]
         return [curve_prime, curvesPath, kernelsOfBigSteps, phiP]
+
+    def isogeny_walk(self, curvesPath, kernelsOfBigSteps, strategy) :
+        k = len(kernelsOfBigSteps)
+        T = self
+        c_t = copy(self.curve)
+
+        # At the moment, isogeny codomain is "up to isomorphism".
+        # From the kernels given in setup, I need to move them into the 
+        # right curve.
+        # That is why `kernel4` is not efficient (change_iso_curve times 
+        # the number of steps in the walk on the graph. In kernel4k, it 
+        # is reduced by a factor 1000.
+        for R in kernelsOfBigSteps :
+            print 'step!'
+            R = R.change_iso_curve(T.curve.a)
+            [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', strategy=strategy)
+        #elif self.method == 'kernel4' :
+        #    for c1 in curvesPath:
+        #        R = Point(1, 1, c1).change_iso_curve(T.curve.a)
+        #        [T] = R.isogeny_degree4([T])
+        return T.change_iso_curve(self.curve.a)
+
