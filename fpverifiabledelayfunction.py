@@ -18,16 +18,7 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
         self.delay = Delta
 
     def setup(self) :
-        '''
-        OUTPUT:
-        * P the first point of the protocol
-        * the ouput of isogeny_walk
-        '''
-
-        # point P of order N
-        P = self.curve.cof_P * self.curve.random_point(1, True)
-        while P.z == 0 :
-            P = self.curve.cof_P * self.curve.random_point(1, True)
+        P = self.curve.pairing_group_random_point(extension_degree=1, twist=True)
         return [P] + P.isogeny_walk(self.delay, self.strategy, self.method, 'fp')
 
     def evaluate(self, Q, curvesPath, kernelsOfBigSteps):

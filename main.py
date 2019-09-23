@@ -4,6 +4,9 @@ import curve
 import argparse
 from sage.rings.integer_ring import ZZ
 from sage.misc.misc import cputime
+from verifiabledelayfunction import VerifiableDelayFunction
+from fpverifiabledelayfunction import FpVerifiableDelayFunction
+from fp2verifiabledelayfunction import Fp2VerifiableDelayFunction
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--protocol", type=str, default="fp",
@@ -65,11 +68,10 @@ elif method == 'kernel4k' :
     file.write('Points of [4^k]-torsion stored.\n\n')
 """
 
-import verifiabledelayfunction
-import fpverifiabledelayfunction
-import fp2verifiabledelayfunction
-
-VDF = fpverifiabledelayfunction.FpVerifiableDelayFunction(method, strategy, c, Delta)
+if protocol == 'fp' :
+    VDF = FpVerifiableDelayFunction(method, strategy, c, Delta)
+else :
+    VDF = Fp2VerifiableDelayFunction(method, strategy, c, Delta)
 
 time = cputime()
 SETUP = VDF.setup()

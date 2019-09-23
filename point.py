@@ -375,9 +375,11 @@ class Point:
         if protocol == 'fp' :
             nbBigSteps = nbSteps // (self.curve.n-2)
             k = (self.curve.n - 1)//2
+            extension_degree = 1
         else :
             nbBigSteps = nbSteps // (self.curve.n)
             k = self.curve.n // 2
+            extension_degree = 2
 
         ev_P = self
         curvesPath = []
@@ -388,7 +390,7 @@ class Point:
         for i in range(nbBigSteps) :
             #P4k defines the kernel of the isogeny
             #Attention, we need to choose the right direction ! With the twist, we go to j=0 or 1728 curve, and there is a problem with the formulas of 4-isogeny...
-            P4k = curve_prime.power_of_2_order_random_point(2*k, 1, False)
+            P4k = curve_prime.power_of_2_order_random_point(2*k, extension_degree, False)
             #Warning ! We do a 4**(k-1) isogeny !
             [ev_P, kernelDual, listOfCurves] = P4k.isogeny_degree4k(ev_P, k, method, strategy, stop=1)
             if not(kernelDual is None) :
