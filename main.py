@@ -38,91 +38,108 @@ if pSize == 'p14-toy' :
     N = 53
     a = 10088
     alpha = 1
-    strategy = [2, 1, 1]
 if pSize == 'p89-toy' :
     f = 1
     n = 64
     N = 27212093
     a = 6
     alpha = 1
-    strategy = [16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1]
 if pSize == 'p1506' :
     f = 63
     n = 1244
     N = 0xc0256a57b1434a4970e315e3e572ad7b6b6268ca27a1bc14a5ec8d6e8f46ab63
     a = 138931309558156184106311716917677778941761847991286360325642242809534952018704195842136094062347931842162775765708572232752796610393601192925341167860358529602430304979627494497048448960083384310735203052588819895230906248500388348984991092188849520120483947949612966752973461165325952933739065855693165670941141036576698048539586409219548698834122183984266610530679658299939991747759033936995784464828547439035421618098378714023855965416127212175477937
     alpha = 3
-    strategy = [256, 128, 110, 64, 32, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 32, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 46, 32, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 14, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 6, 4, 2, 1, 1, 2, 1, 1, 2, 2, 1, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 64, 32, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 32, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 128, 64, 32, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 32, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 64, 32, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 32, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 16, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1, 8, 4, 2, 1, 1, 2, 1, 1, 4, 2, 1, 1, 2, 1, 1]
-
-# Choice of Delta depending on nbIterations and n
-Delta = nbIterations
 
 c = curve.Curve(f, n, N, a, alpha)
 
-"""file = open("timing_" + protocol + "_" + method + "_" + pSize + "_" + str(c.Delta) + "steps.txt", "a")
+# The delay will depend on nbIterations *and n*
+Delta = nbIterations
 
-file.write("VDF over " + protocol + " with log_2(p) = " + str(ZZ(c.p).nbits()) + " and log_2(T) = " + str(ZZ(c.Delta).nbits()) + ".\n")
-if method == 'kernel4' :
-    file.write('Points of [4]-torsion stored.\n\n')
-elif method == 'kernel4k' :
-    file.write('Points of [4^k]-torsion stored.\n\n')
-"""
+#file = open("timing_" + protocol + "_" + method + "_" + pSize + "_" + str(c.Delta) + "steps.txt", "a") 
+#file.write("VDF over " + protocol + " with log_2(p) = " + str(ZZ(c.p).nbits()) + " and log_2(T) = " + str(ZZ(c.Delta).nbits()) + ".\n")
+#if method == 'kernel4' :
+#    file.write('Points of [4]-torsion stored.\n\n')
+#elif method == 'kernel4k' :
+#    file.write('Points of [4^k]-torsion stored.\n\n')
+
+def strategy(n, p, q):
+    '''
+    INPUT:
+    * n the number of isogenies we want to compute (the diagonal length of the tree)
+    * p the cost of one multiplication step
+    * q the cost of one isogeny step
+    OUTPUT:
+    * a list corresponding to a strategy
+    REMARK:
+    from Luca De Feo's answer on crypto.stackexchange.com
+    '''
+    S = { 1: [] }
+    C = { 1: 0 }
+    for i in range(2, n+2):
+        b, cost = min(((b, C[i-b] + C[b] + b*p + (i-b)*q) for b in range(1,i)), key=lambda t: t[1])
+        S[i] = [b] + S[i-b] + S[b]
+        C[i] = cost
+    return S[n+1]
 
 if protocol == 'fp' :
-    VDF = FpVerifiableDelayFunction(method, strategy, c, Delta)
+    VDF = FpVerifiableDelayFunction(method, strategy((c.n-2)//2, 1, 1), c, Delta)
 else :
-    VDF = Fp2VerifiableDelayFunction(method, strategy, c, Delta)
+    VDF = Fp2VerifiableDelayFunction(method, strategy(c.n//2, 1, 1), c, Delta)
 
 time = cputime()
 SETUP = VDF.setup()
 time = cputime(time)
 print('setup timing: %.5f seconds.' % time)
-[P, c_prime, curvesPath, kernelsOfBigSteps, phiP] = SETUP
-"""file.write("Setup:\t" + str(time) + " seconds.\n")
-"""
-for cc in curvesPath :
-    print(cc)
+[P, phiP, dualKernels] = SETUP
+
+c2 = dualKernels[0].curve
+
+#file.write("Setup:\t" + str(time) + " seconds.\n")
 
 #Generating a point Q
 #NOT IN THE SAME SUBGROUP AS phiP !!!
 phiP_ws = phiP.weierstrass()
+print phiP_ws.order().factor()
 e_phiP_Q = 1
 while e_phiP_Q == 1 :
-    Q = c_prime.cof_P * c_prime.random_point(1 if protocol=='fp' else 2)
+    Q = c2.cof_P * c2.random_point(1 if protocol=='fp' else 2, True)
     while Q.z == 0 :
-        Q = c_prime.cof_P * c_prime.random_point(1 if protocol=='fp' else 2)
+        Q = c2.cof_P * c2.random_point(1 if protocol=='fp' else 2, True)
     Q_ws = Q.weierstrass()
-    e_phiP_Q = Q_ws.weil_pairing(phiP_ws, ZZ(c_prime.N))
+    e_phiP_Q = Q_ws.weil_pairing(phiP_ws, ZZ(c2.N))
 
+print(c2.N * Q)
 #EVAL
 time = cputime()
 Tr_hat_phiQ = VDF.evaluate(Q, curvesPath, kernelsOfBigSteps)
 time = cputime(time)
 print('eval timing: %.5f seconds.' % time)
-"""file.write('Eval:\t'+ str(time) + ' seconds.\n')
-"""
 
-#VERIFY
+#file.write('Eval:\t'+ str(time) + ' seconds.\n')
+"""#VERIFY
 time = cputime()
 ver = VDF.verify(P, phiP, Q, Tr_hat_phiQ)
 time = cputime(time)
 print('verif timing: %.5f seconds.' % time)
-"""file.write('Verif:\t' + str(time) + ' seconds.\n')
-"""
+
+#file.write('Verif:\t' + str(time) + ' seconds.\n')
 
 print('###############')
 if ver :
     print('#verif OK  :-)#')
-    """file.write('verif ok\n')
-    """
+
+    #file.write('verif ok\n')
 else :
     print('#verif nOK :-(#')
-    """file.write('verif nok\n')
-    file.write("setup = " + str(setup)+ "\n")
-    file.write("Tr_hat_phiQ = " + str(Tr_hat_phiQ) + "\n")
-    """
+
+    #file.write('verif nok\n')
+    #file.write("setup = " + str(setup)+ "\n")
+    #file.write("Tr_hat_phiQ = " + str(Tr_hat_phiQ) + "\n")
+
 print('###############')
 
-"""file.write("\n")
-file.close()
+#file.write("\n")
+#file.close()
+
 """

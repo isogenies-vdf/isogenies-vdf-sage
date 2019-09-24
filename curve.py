@@ -96,3 +96,4 @@ class Curve:
             return point.Point(P[0] - self.a/3, 1, self)
         X, Y, Z = P[0]/P[2], P[1]/P[2], 1
         return self.getPointFromWeierstrass([X,Y,Z])
+

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*- 
-import pairing
 from sage.rings.integer_ring import ZZ
-from point import Point
-import curve
 from copy import copy
+import curve
+from point import Point
+import pairing
 from verifiabledelayfunction import VerifiableDelayFunction
 
 class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
@@ -13,39 +13,33 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
         self.method = method
         self.strategy = strategy
         self.curve = curve
+        # We choose delay = 2*x*curve.n
         Delta = delay
-        while Delta % curve.n != 0 or (Delta // curve.n) % 2 != 0:
+        while Delta % (curve.n) != 0 or (Delta // curve.n)  % 2 != 0:
             Delta += 1
         self.delay = Delta
 
     def setup(self):
         P = self.curve.pairing_group_random_point(extension_degree=1, twist=True)
-        return [P] + P.random_isogeny_walk(self.delay, 2, self.strategy, 0, self.method)
+        return [P] + self.setup_walk(2, P, stop=0)
 
-    def evaluate(self, Q, curvesPath, kernelsOfBigSteps):
+    def evaluate(self, Q, dualKernels):
         '''
         INPUT:
         * Q the second point of the protocol
-        * curvesPath from the setup
-        * kernelsOfBigSteps from the setup
+        * dualKernels from the setup
         OUTPUT:
         * Tr_hat_phiQ the list of the possible images of Q by the dual walk composed by Trace (4 possible because of sign pb)
         '''
-        if self.delay % self.curve.n != 0 :
-            raise RuntimeError('Delta is not a multiple of n')
-        T = Q.isogeny_walk(curvesPath, kernelsOfBigSteps, self.strategy)
         #T = hatphi(Q)
-
+        T = self.evaluation_walk(Q, dualKernels, 0)
         #Trace trick
         frob_T = Point(T.x**c.p, T.z**c.p, T.curve)
-
         #not efficient
         fQ_ws = frob_T.weierstrass()
         Q_ws = T.weierstrass()
-
         R1 = Q_ws + fQ_ws
         R2 = Q_ws - fQ_ws
-
         #the (+/-) point to return is the one defined over Fp :-)
         return self.curve.getPointFromWeierstrass(R1) if R1[0] in self.curve.Fp and R1[1] in self.curve.Fp else self.curve.getPointFromWeierstrass(R2)
 

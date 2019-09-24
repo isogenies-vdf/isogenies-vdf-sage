@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*- 
+from copy import copy
 
 class VerifiableDelayFunction:
     def __init__(self, method, strategy, curve, delay):
@@ -12,24 +13,71 @@ class VerifiableDelayFunction:
 
     __str__ = __repr__
 
-    def walk_back(self, Q, curvesPath, kernelsOfBigSteps) :
-        k = len(kernelsOfBigSteps)
+    def setup_walk(self, extensionDegree, P, stop) :
+        '''
+        INPUT:
+        * extensionDegree for the extension of the field where we choose points for the walk
+        * P a point of self.curve for which we want the image
+        OUTPUT:
+        * phiP the image of P by the random isogeny
+        * dualKernels the list of the dual isogenies kernels
+        REMARK:
+        * Do not walk to the j=0,1728 curve at first step! The formulas of [4]-isogenies for these curves do not work for the moment.
+        '''
+        # Using isogeny_degree4k, we compute k steps in a row
+        k = len(self.strategy)
+        # We need to do delay // k steps
+        assert self.delay % k == 0
+        nbSteps = self.delay // k
+
+        c = copy(self.curve)
+        images = [P]
+        dualKernels = []
+
+        first = True
+
+        for i in range(nbSteps) :
+            if first : # we check the first step does not go to j=0 or 1728 curve
+                j = 0
+                while j == 0 or j == 1728 :
+                    P4k = c.power_of_2_order_random_point(2*k, extensionDegree, False)
+                    P4 = P4k.get_P4(k)
+                    xP4 = P4.normalize().x
+                    while xP4 == 1 or xP4 == -1 :
+                        P4k = c.power_of_2_order_random_point(2*k, extensionDegree, False)
+                        P4 = P4k.get_P4(k)
+                        xP4 = P4.normalize().x
+                    curve_onestep = P4.isogeny_degree4(images)[0].curve
+                    j = curve_onestep.weierstrass().j_invariant()
+                first = False
+                dualKernelsTODO
+            else :
+                # kernel defines an isoeny of degree 4**k
+                kernel = c.power_of_2_order_random_point(2*k, extensionDegree, False)
+                # the image of dual_kernel will define the dual isogeny
+                dual_kernel = kernel.dual_kernel_point(k)
+                images.append(dual_kernel)
+                images = kernel.isogeny_degree4k(images, k, self.strategy, stop)
+                dualKernels.append(images.pop())
+            phiP = images[0]
+        dualKernels = dualKernels[::-1]
+        return [phiP, dualKernels]
+
+    def evaluation_walk(self, Q, dualKernels, stop):
+        '''
+        INPUT:
+        * Q the second point of the protocol
+        * dualKernels from the setup
+        OUTPUT:
+        * hat_phiQ the image of Q by the dual walk
+        '''
+        k = len(dualKernels)
         T = Q
         c_t = copy(Q.curve)
 
-        # At the moment, isogeny codomain is "up to isomorphism".
-        # From the kernels given in setup, I need to move them into the 
-        # right curve.
-        # That is why `kernel4` is not efficient (change_iso_curve times 
-        # the number of steps in the walk on the graph. In kernel4k, it 
-        # is reduced by a factor 1000.
-        if self.method == 'kernel4k' :
-            for R in kernelsOfBigSteps :
-                R = R.change_iso_curve(T.curve.a)
-                [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', strategy=self.strategy)
-        elif self.method == 'kernel4' :
-            for c1 in curvesPath:
-                R = Point(1, 1, c1).change_iso_curve(T.curve.a)
-                [T] = R.isogeny_degree4([T])
+        # TODO this is not efficient.
+        for R in kernelsOfBigSteps :
+            R = R.change_iso_curve(T.curve.a)
+            [T] = R.isogeny_degree4k([T], k, self.strategy, stop)
         return T.change_iso_curve(self.curve.a)
 

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*- 
-from point import Point
 from sage.rings.integer_ring import ZZ
 from copy import copy
+import curve
+from point import Point
 import pairing
 from verifiabledelayfunction import VerifiableDelayFunction
 
@@ -19,18 +20,17 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
 
     def setup(self) :
         P = self.curve.pairing_group_random_point(extension_degree=1, twist=True)
-        return [P] + P.random_isogeny_walk(self.delay, 1,  self.strategy, 1 ,self.method)
+        return [P] + self.setup_walk(1, P, stop=1)
 
-    def evaluate(self, Q, curvesPath, kernelsOfBigSteps):
+    def evaluate(self, Q, dualKernels):
         '''
         INPUT:
         * Q the second point of the protocol
-        * curvesPath from the setup
-        * kernelsOfBigSteps from the setup
+        * dualKernels from the setup
         OUTPUT:
         * hat_phiQ the image of Q by the dual walk
         '''
-        return Q.isogeny_walk(curvesPath, kernelsOfBigSteps, self.strategy)
+        return self.evaluation_walk(Q, dualKernels, 1)
 
     def verify(self, P, phiP, Q, hat_phiQ) :
         '''
