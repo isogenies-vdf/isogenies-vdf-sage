@@ -7,17 +7,28 @@ import pairing
 from verifiabledelayfunction import VerifiableDelayFunction
 
 class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
-    def __init__(self, method, strategy, curve, delay):
+    def __init__(self, method, curve, delay):
         #change it with super().__init__(method, strategy, curve, delay)
         # For the moment, python3 does not work...
         self.method = method
-        self.strategy = strategy
         self.curve = curve
         # We choose delay = 2*x*curve.n
         Delta = delay
         while Delta % (curve.n) != 0 or (Delta // curve.n)  % 2 != 0:
             Delta += 1
         self.delay = Delta
+        # this is the strategy computation given in Luca De Feo's answer on crypto.stackexchange.com
+        # it could be hard-coded.
+        S = { 1: [] }
+        C = { 1: 0 }
+        p = 1
+        q = 1
+        nbIsog = (curve.n)//2
+        for i in range(2, nbIsog+2):
+            b, cost = min(((b, C[i-b] + C[b] + b*p + (i-b)*q) for b in range(1,i)), key=lambda t: t[1])
+            S[i] = [b] + S[i-b] + S[b]
+            C[i] = cost
+        self.strategy = S[nbIsog+1]
 
     def setup(self):
         P = self.curve.pairing_group_random_point(extension_degree=1, twist=True)
@@ -34,7 +45,7 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
         #T = hatphi(Q)
         T = self.evaluation_walk(Q, dualKernels, 0)
         #Trace trick
-        frob_T = Point(T.x**c.p, T.z**c.p, T.curve)
+        frob_T = Point(T.x**self.curve.p, T.z**self.curve.p, T.curve)
         #not efficient
         fQ_ws = frob_T.weierstrass()
         Q_ws = T.weierstrass()

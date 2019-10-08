@@ -63,29 +63,10 @@ Delta = nbIterations
 #elif method == 'kernel4k' :
 #    file.write('Points of [4^k]-torsion stored.\n\n')
 
-def strategy(n, p, q):
-    '''
-    INPUT:
-    * n the number of isogenies we want to compute (the diagonal length of the tree)
-    * p the cost of one multiplication step
-    * q the cost of one isogeny step
-    OUTPUT:
-    * a list corresponding to a strategy
-    REMARK:
-    from Luca De Feo's answer on crypto.stackexchange.com
-    '''
-    S = { 1: [] }
-    C = { 1: 0 }
-    for i in range(2, n+2):
-        b, cost = min(((b, C[i-b] + C[b] + b*p + (i-b)*q) for b in range(1,i)), key=lambda t: t[1])
-        S[i] = [b] + S[i-b] + S[b]
-        C[i] = cost
-    return S[n+1]
-
 if protocol == 'fp' :
-    VDF = FpVerifiableDelayFunction(method, strategy((c.n-2)//2, 1, 1), c, Delta)
+    VDF = FpVerifiableDelayFunction(method, c, Delta)
 else :
-    VDF = Fp2VerifiableDelayFunction(method, strategy(c.n//2, 1, 1), c, Delta)
+    VDF = Fp2VerifiableDelayFunction(method, c, Delta)
 
 time = cputime()
 SETUP = VDF.setup()
@@ -100,19 +81,18 @@ c2 = dualKernels[0].curve
 #Generating a point Q
 #NOT IN THE SAME SUBGROUP AS phiP !!!
 phiP_ws = phiP.weierstrass()
-print phiP_ws.order().factor()
+
 e_phiP_Q = 1
 while e_phiP_Q == 1 :
-    Q = c2.cof_P * c2.random_point(1 if protocol=='fp' else 2, True)
+    Q = c2.cof_P * c2.random_point(1 if protocol=='fp' else 2, False)
     while Q.z == 0 :
-        Q = c2.cof_P * c2.random_point(1 if protocol=='fp' else 2, True)
+        Q = c2.cof_P * c2.random_point(1 if protocol=='fp' else 2, False)
     Q_ws = Q.weierstrass()
     e_phiP_Q = Q_ws.weil_pairing(phiP_ws, ZZ(c2.N))
 
-print(c2.N * Q)
 #EVAL
 time = cputime()
-Tr_hat_phiQ = VDF.evaluate(Q, curvesPath, kernelsOfBigSteps)
+Tr_hat_phiQ = VDF.evaluate(Q, dualKernels)
 time = cputime(time)
 print('eval timing: %.5f seconds.' % time)
 

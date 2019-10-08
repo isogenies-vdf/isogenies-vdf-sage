@@ -58,7 +58,7 @@ class Curve:
         cof = (self.p+1) // (2**k)
 
         if extension_field == 1 :
-            # As  E(Fp) \simeq ZZ / ((p+1)/2) ZZ \times ZZ / 2 ZZ
+            # E(Fp) \simeq ZZ / ((p+1)/2) ZZ \times ZZ / 2 ZZ
             # there is no point of order 2^curve.n
             if k == self.n :
                 raise RuntimeError('impossible to get a point of order 2^%d over Fp' % k)

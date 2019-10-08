@@ -233,9 +233,6 @@ class Point:
                 phiP_Xprime = (X+Z)**2 * (self.curve.a*X*Z + X**2 + Z**2)
                 phiP_Zprime = (2-self.curve.a) * X * Z * (X-Z)**2
                 list_images.append(Point(phiP_Xprime, phiP_Zprime, curve_prime))
-        for ff in list_images :
-            print(ff.weierstrass().order().factor())
-        print('')
         return list_images
 
     def dual_kernel_point(self, k) :
@@ -281,20 +278,19 @@ class Point:
         curve_target.a = a
         return Point(iso(P_ws)[0], 1, curve_target)
 
-    def isogeny_degree4k(self, listOfPoints, k, strategy, stop=0) :
+    def isogeny_degree4k(self, listOfPoints, strategy, stop=0) :
         '''
         INPUT:
         * self the point defining the kernel of the isogeny, of degree 4**k
         * listOfPoints a list of points that we want to evaluate
-        * k such that the isogeny is of degree 4**k
-        * strategy a string defining the strategy to adopt: here it will be hardcoded
+        * strategy a string defining the strategy to adopt: it could be hardcoded. k = len(strategy)
         * stop an integer if we want to stop before the k-th 4-isogeny.
         OUTPUT:
         * images the list of the images of the points of listOfPoints
         REMARKS:
         * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
         '''
-
+        k = len(strategy)
         l = k
         i = 0
         images = listOfPoints
@@ -334,7 +330,7 @@ class Point:
         for R in kernelsOfBigSteps :
             print 'step!'
             R = R.change_iso_curve(T.curve.a)
-            [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, k, method='withoutKernel', strategy=strategy)
+            [T, kernelPoint, listOfCurves] = R.isogeny_degree4k(T, method='withoutKernel', strategy=strategy)
         #elif self.method == 'kernel4' :
         #    for c1 in curvesPath:
         #        R = Point(1, 1, c1).change_iso_curve(T.curve.a)

@@ -7,20 +7,31 @@ import pairing
 from verifiabledelayfunction import VerifiableDelayFunction
 
 class FpVerifiableDelayFunction(VerifiableDelayFunction):
-    def __init__(self, method, strategy, curve, delay):
+    def __init__(self, method, curve, delay):
         #change it with super().__init__(method, strategy, curve, delay)
         # For the moment, python3 does not work...
         self.method = method
-        self.strategy = strategy
         self.curve = curve
         Delta = delay
         while Delta % (curve.n-2) != 0 or (Delta // (curve.n-2)) % 2 != 0:
             Delta += 1
         self.delay = Delta
+        # this is the strategy computation given in Luca De Feo's answer on crypto.stackexchange.com
+        # it could be hard-coded.
+        S = { 1: [] }
+        C = { 1: 0 }
+        p = 1
+        q = 1
+        nbIsog = (curve.n-2)//2
+        for i in range(2, nbIsog+2):
+            b, cost = min(((b, C[i-b] + C[b] + b*p + (i-b)*q) for b in range(1,i)), key=lambda t: t[1])
+            S[i] = [b] + S[i-b] + S[b]
+            C[i] = cost
+        self.strategy = S[nbIsog+1]
 
     def setup(self) :
         P = self.curve.pairing_group_random_point(extension_degree=1, twist=True)
-        return [P] + self.setup_walk(1, P, stop=1)
+        return [P] + self.setup_walk(1, P, stop=1, conditionP4=False)
 
     def evaluate(self, Q, dualKernels):
         '''
