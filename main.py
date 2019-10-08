@@ -97,7 +97,7 @@ time = cputime(time)
 print('eval timing: %.5f seconds.' % time)
 
 #file.write('Eval:\t'+ str(time) + ' seconds.\n')
-"""#VERIFY
+#VERIFY
 time = cputime()
 ver = VDF.verify(P, phiP, Q, Tr_hat_phiQ)
 time = cputime(time)
@@ -122,4 +122,3 @@ print('###############')
 #file.write("\n")
 #file.close()
 
-"""
