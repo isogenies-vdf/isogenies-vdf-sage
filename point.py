@@ -6,7 +6,7 @@ from sage.arith.misc import valuation
 from copy import copy
 from collections import deque
 from sage.schemes.elliptic_curves.weierstrass_morphism import WeierstrassIsomorphism
-from sage.misc.functional import numerical_approx
+#from sage.misc.functional import numerical_approx
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 from sage.functions.other import sqrt
 
