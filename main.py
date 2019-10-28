@@ -26,7 +26,7 @@ args = parser.parse_args()
 numeric_level = getattr(logging, args.loglevel.upper(), None)
 if not isinstance(numeric_level, int):
     raise ValueError('Invalid log level: %s' % args.loglevel)
-logging.basicConfig(filename='vdf.log', level=numeric_level)
+logging.basicConfig(filename='vdf.log', filemode='w', level=numeric_level)
 
 protocol = args.protocol
 method = args.method
