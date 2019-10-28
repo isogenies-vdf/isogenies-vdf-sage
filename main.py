@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import point
 import curve
 import argparse
@@ -7,6 +8,8 @@ from sage.misc.misc import cputime
 from verifiabledelayfunction import VerifiableDelayFunction
 from fpverifiabledelayfunction import FpVerifiableDelayFunction
 from fp2verifiabledelayfunction import Fp2VerifiableDelayFunction
+
+logging.basicConfig(filename='vdf.log', level=logging.INFO)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--protocol", type=str, default="fp",
@@ -17,8 +20,6 @@ parser.add_argument("--pSize", type=str, default="p14-toy",
                     help="determine the size of the prime p to use")
 parser.add_argument("--nbIterations", type=int, default=12,
                     help="set the number of iterations of the VDF")
-parser.add_argument("-v", "--verbose", help="increase output verbosity",
-                    action="store_true")
 
 args = parser.parse_args()
 
@@ -26,11 +27,6 @@ protocol = args.protocol
 method = args.method
 pSize = args.pSize
 nbIterations = int(args.nbIterations)
-
-verbose =  args.verbose
-
-if verbose:
-    print("verbosity turned on")
 
 if pSize == 'p14-toy' :
     f = 1
@@ -56,12 +52,10 @@ c = curve.Curve(f, n, N, a, alpha)
 # The delay will depend on nbIterations *and n*
 Delta = nbIterations
 
-#file = open("timing_" + protocol + "_" + method + "_" + pSize + "_" + str(c.Delta) + "steps.txt", "a") 
-#file.write("VDF over " + protocol + " with log_2(p) = " + str(ZZ(c.p).nbits()) + " and log_2(T) = " + str(ZZ(c.Delta).nbits()) + ".\n")
-#if method == 'kernel4' :
-#    file.write('Points of [4]-torsion stored.\n\n')
-#elif method == 'kernel4k' :
-#    file.write('Points of [4^k]-torsion stored.\n\n')
+logging.info('Protocol: %s', protocol)
+logging.info('Method: %s', method)
+logging.info('Prime size: %s', pSize)
+logging.info('Number of steps: %s', str(Delta))
 
 if protocol == 'fp' :
     VDF = FpVerifiableDelayFunction(method, c, Delta)
@@ -76,7 +70,7 @@ print('setup timing: %.5f seconds.' % time)
 
 c2 = dualKernels[0].curve
 
-#file.write("Setup:\t" + str(time) + " seconds.\n")
+logging.info('Setup:\t\t\t%s seconds', str(time))
 
 #Generating a point Q
 #NOT IN THE SAME SUBGROUP AS phiP !!!
@@ -95,30 +89,23 @@ time = cputime()
 Tr_hat_phiQ = VDF.evaluate(Q, dualKernels)
 time = cputime(time)
 print('eval timing: %.5f seconds.' % time)
+logging.info('Evaluation:\t\t\t%s seconds', str(time))
 
-#file.write('Eval:\t'+ str(time) + ' seconds.\n')
 #VERIFY
 time = cputime()
 ver = VDF.verify(P, phiP, Q, Tr_hat_phiQ)
 time = cputime(time)
 print('verif timing: %.5f seconds.' % time)
-
-#file.write('Verif:\t' + str(time) + ' seconds.\n')
+logging.info('Verification:\t\t\t%s seconds', str(time))
 
 print('###############')
 if ver :
     print('#verif OK  :-)#')
-
-    #file.write('verif ok\n')
+    logging.info('Verification is\t\tOK')
 else :
     print('#verif nOK :-(#')
-
-    #file.write('verif nok\n')
-    #file.write("setup = " + str(setup)+ "\n")
-    #file.write("Tr_hat_phiQ = " + str(Tr_hat_phiQ) + "\n")
+    logging.info('Verification is\t\tnot OK')
+    #logging.info(setup = %s', str(SETUP))
+    logging.info('Tr_hat_phiQ = %s', str(Tr_hat_phiQ))
 
 print('###############')
-
-#file.write("\n")
-#file.close()
-
