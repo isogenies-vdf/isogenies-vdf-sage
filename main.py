@@ -9,8 +9,6 @@ from verifiabledelayfunction import VerifiableDelayFunction
 from fpverifiabledelayfunction import FpVerifiableDelayFunction
 from fp2verifiabledelayfunction import Fp2VerifiableDelayFunction
 
-logging.basicConfig(filename='vdf.log', level=logging.INFO)
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--protocol", type=str, default="fp",
                     help="choose the VDF protocol to use")
@@ -20,8 +18,15 @@ parser.add_argument("--pSize", type=str, default="p14-toy",
                     help="determine the size of the prime p to use")
 parser.add_argument("--nbIterations", type=int, default=12,
                     help="set the number of iterations of the VDF")
+parser.add_argument("--loglevel", type=str, default="INFO",
+                    help="determines the severity for the logs")
 
 args = parser.parse_args()
+
+numeric_level = getattr(logging, args.loglevel.upper(), None)
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % args.loglevel)
+logging.basicConfig(filename='vdf.log', level=numeric_level)
 
 protocol = args.protocol
 method = args.method
