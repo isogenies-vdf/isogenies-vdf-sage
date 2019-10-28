@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*- 
+import logging
 from sage.rings.integer_ring import ZZ
 from copy import copy
 import curve
@@ -32,6 +33,7 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
 
     def setup(self):
         P = self.curve.pairing_group_random_point(extension_degree=1, twist=True)
+        logging.debug('P = %s', str(P))
         return [P] + self.setup_walk(2, P, stop=0)
 
     def evaluate(self, Q, dualKernels):
@@ -75,20 +77,26 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
         Q_ws = Q.weierstrass()
         Tr_hat_phiQ_ws = Tr_hat_phiQ.weierstrass()
 
+        logging.debug('Denominator computed')
+
         _Z, mil11 = pairing.miller(Tr_hat_phiQ_ws, P_ws, ZZ(self.curve.N), denominator=True)
         e1 = pairing.exponentiation(self.curve, mil11[0]/mil11[1])
+        loggging.debug('f_{N, TrhatphiQ}(P) = %s', str(mil11))
+        logging.debug('e(TrHatPhiQ, P) = %s', str(e1))
 
         _Z, mil22 = pairing.miller(Q_ws, phiP_ws, ZZ(self.curve.N), denominator=True)
         e2_squared = pairing.exponentiation(self.curve, mil22[0]/mil22[1])**2
+        logging.debug('f_{N, Q}(phiP) = %s', str(mil22))
+        logging.debug('e(Q, phiP)² = %s', str(e2_squared))
 
         if e1 != 1 :
             if e1 == e2_squared :
                 return True
             if e1 == 1/e2_squared:
                 return True
-            print('pairing eq doesnt hold')
             # Pairing equation does not hold
+            logging.debug('Pairing equation does not hold.')
             return False
-        print('pairing eq 1')
         # e_Tr_hat_phiQ_P = 1
+        logging.debug('e(TrHatPhiQ, P) = 1.')
         return False

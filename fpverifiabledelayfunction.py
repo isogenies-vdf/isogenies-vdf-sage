@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*- 
+import logging
 from sage.rings.integer_ring import ZZ
 from copy import copy
 import curve
@@ -31,6 +32,7 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
 
     def setup(self) :
         P = self.curve.pairing_group_random_point(extension_degree=1, twist=True)
+        logging.debug('P = %s', str(P))
         return [P] + self.setup_walk(1, P, stop=1, conditionP4=False)
 
     def evaluate(self, Q, dualKernels):
@@ -64,11 +66,18 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
         Q_ws = Q.weierstrass()
         hat_phiQ_ws = hat_phiQ.weierstrass()
 
+        logging.debug('No denominator computed.')
+
         _Z, mil11 = pairing.miller(hat_phiQ_ws, P_ws, ZZ(self.curve.N), denominator=False)
         e1 = pairing.exponentiation(self.curve, mil11[0]/mil11[1])
+        logging.debug('f_{N, hatphiQ}(P) = %s', str(mil11))
+        logging.debug('e(hatphiQ, P) = %s', str(e1))
+
 
         _Z, mil22 = pairing.miller(Q_ws, phiP_ws, ZZ(self.curve.N), denominator=False)
         e2 = pairing.exponentiation(self.curve, mil22[0]/mil22[1])
+        logging.debug('f_{N, Q}(phiP) = %s', str(mil22))
+        logging.debug('e(Q, phiP) = %s', str(e2))
 
         if e1 != 1 :
             if e1 == e2 :
@@ -76,6 +85,8 @@ class FpVerifiableDelayFunction(VerifiableDelayFunction):
             if e1 == 1/e2:
                 return True
             # Pairing equation does not hold
+            logging.debug('Pairing equation does not hold.')
             return False
-        # e_Tr_hat_phiQ_P = 1
+        # e_hat_phiQ_P = 1
+        logging.debug('e(HatPhiQ, P) = 1.')
         return False
