@@ -23,10 +23,11 @@ parser.add_argument("--loglevel", type=str, default="INFO",
 
 args = parser.parse_args()
 
-numeric_level = getattr(logging, args.loglevel.upper(), None)
+numeric_level = getattr(logging, (args.loglevel).upper(), None)
 if not isinstance(numeric_level, int):
     raise ValueError('Invalid log level: %s' % args.loglevel)
-logging.basicConfig(filename='vdf.log', filemode='w', level=numeric_level)
+#logging.basicConfig(filename='vdf.log', filemode='w', level=numeric_level, format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p')
+logging.basicConfig(filename='vdf.log', filemode='w', level=numeric_level, format='%(message)s')
 
 protocol = args.protocol
 method = args.method
@@ -75,7 +76,7 @@ print('setup timing: %.5f seconds.' % time)
 
 c2 = dualKernels[0].curve
 
-logging.info('Setup:\t\t\t%s seconds', str(time))
+logging.info('Setup:\t\t\t\t%s seconds', str(time))
 
 #Generating a point Q
 #NOT IN THE SAME SUBGROUP AS phiP !!!
@@ -106,10 +107,10 @@ logging.info('Verification:\t\t\t%s seconds', str(time))
 print('###############')
 if ver :
     print('#verif OK  :-)#')
-    logging.info('Verification is\t\tOK')
+    logging.info('\t\t\t\tVerification OK')
 else :
     print('#verif nOK :-(#')
-    logging.info('Verification is\t\tnot OK')
+    logging.info('\t\t\t\tVerification NOT OK')
     #logging.info(setup = %s', str(SETUP))
     logging.info('Tr_hat_phiQ = %s', str(Tr_hat_phiQ))
 

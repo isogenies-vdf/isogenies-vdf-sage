@@ -3,12 +3,13 @@
 https://eprint.iacr.org/2019/166.pdf
 
 # How to compute our VDF ?
-`sage -python3 vdf.py --protocol PROTOCOL --method METHOD --pSize PSIZE --nbIterations NBITERATIONS`
+`sage -python3 vdf.py --protocol PROTOCOL --method METHOD --pSize PSIZE --nbIterations NBITERATIONS --loglevel LOGLEVEL`
 where:
 - `PROTOCOL` is `fp` or `fp2`
 - `METHOD` is `kernel4k` or `kernel4`
 - `PSIZE` is `p14-toy`, `p89-toy` or `p1506`
 - `NBITERATIONS` is the number of 2-isogenies to compute for the evaluation.
+- 'LOGLEVEL' is the severity for the logging.
 
 # Issues.
 
