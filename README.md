@@ -9,7 +9,7 @@ where:
 - `METHOD` is `kernel4k` or `kernel4`
 - `PSIZE` is `p14-toy`, `p89-toy` or `p1506`
 - `NBITERATIONS` is the number of 2-isogenies to compute for the evaluation.
-- 'LOGLEVEL' is the severity for the logging.
+- `LOGLEVEL` is the severity for the logging.
 
 # Issues.
 
