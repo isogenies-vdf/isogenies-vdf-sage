@@ -81,7 +81,7 @@ class Fp2VerifiableDelayFunction(VerifiableDelayFunction):
 
         _Z, mil11 = pairing.miller(Tr_hat_phiQ_ws, P_ws, ZZ(self.curve.N), denominator=True)
         e1 = pairing.exponentiation(self.curve, mil11[0]/mil11[1])
-        loggging.debug('f_{N, TrhatphiQ}(P) = %s', str(mil11))
+        logging.debug('f_{N, TrhatphiQ}(P) = %s', str(mil11))
         logging.debug('e(TrHatPhiQ, P) = %s', str(e1))
 
         _Z, mil22 = pairing.miller(Q_ws, phiP_ws, ZZ(self.curve.N), denominator=True)
