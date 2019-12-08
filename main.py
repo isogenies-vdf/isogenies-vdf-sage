@@ -1,3 +1,5 @@
+#!/usr/bin/env sage
+
 # -*- coding: utf-8 -*-
 import logging
 import point
