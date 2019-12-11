@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*- 
-import curve
-from sage.rings.finite_rings.finite_field_constructor import GF
-from sage.rings.integer_ring import ZZ
 
 def eval_line(R, P, Q) :
     """
@@ -52,8 +49,7 @@ def miller(P, Q, n, denominator=False) :
     # return the miller loop f_{P, n}(Q) for an even embedded degree curve
     if Q.is_zero():
         raise ValueError("Q must be nonzero.")
-    n = ZZ(n)
-    if n.is_zero():
+    if n == 0:
         raise ValueError("n must be nonzero.")
     n_is_negative = False
     if n < 0:
@@ -89,18 +85,18 @@ def miller(P, Q, n, denominator=False) :
     return [S, [t_num,t_den]]
 
 
-def exponentiation(curve, x) :
+def exponentiation(setup, x) :
     """
     INPUT: 
     * x an element of Fp2
     OUTPUT:
     * x**((p**2-1)//N) in our special case where (p**2 - 1)//N == f* 2**(n+1) * (2**(n-1) * f * N - 1)
     """
-    x1 = (x**curve.f)
-    for i in range(curve.n+1) :
+    x1 = (x**setup.f)
+    for i in range(setup.n+1) :
         x1 = x1**2
     x2 = x1
-    x3 = x2**(curve.f*curve.N)
-    for i in range(curve.n-1) :
+    x3 = x2**(setup.f*setup.N)
+    for i in range(setup.n-1) :
         x3 = x3**2
     return x3/x2
