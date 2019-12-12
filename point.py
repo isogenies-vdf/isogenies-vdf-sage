@@ -102,31 +102,50 @@ class Point:
             return Point(1, 0, self.curve)
         return R0
 
-    def trace(self):
+    def trace(self, image):
         '''
         Compute the trace of this point, i.e. P + π(P)
 
-        Only returns the normalized x coordinate (in GF(p)) of the trace.
-        '''
+        INPUT:
 
-        # using addition formula:
-        #
-        #   (x,y) + (x^p,y^p) = (y^p-y)²/(x^p-x)₂ - A - (x^p+x)
-        #
-        # the code assumes GF(p²) is represented as GF(p)[i]
+        `image` is the image curve (defined over GF(p)) of the trace map
+
+        OUTPUT:
+
+        The trace of this point in `image`
+        '''
+        assert self.curve.alpha == image.alpha, 'Trace image curve does not match.'
         
         # using affine coordinates, maybe not the best
         x = self.x / self.z
-        y2 = (x**2 + self.curve.A*x + 1)*x
-        
-        # (y^p - y)² = (y²)^p + y² -2y^(p+1) = 2 ( Re(y²) - Norm(y) )
-        normy = y2**((x.parent().characteristic() + 1) // 2)
-        num = 2 * (y2.polynomial()[0] - normy)
+        GFp = image.field
 
-        # (x^p - x)² = -4 Im(x)
-        den = -4 * x.polynomial()[1]**2
+        # deal with the special cases self ∈ ker(π-1) ∪ ker(π+1)
+        if x in GFp:
+            if self in image:
+                # double
+                tmp = Point(x, 1, image)
+                return 2*tmp
+            else:
+                # zero point
+                return Point(1, 0, image)
 
-        return num/den - self.curve.A - 2*x.polynomial()[0]
+        else:
+            # using addition formula:
+            #
+            #   (x,y) + (x^p,y^p) = (y^p-y)²/(x^p-x)₂ - A - (x^p+x)
+            #
+            # the code assumes GF(p²) is represented as GF(p)[i]
+            y2 = (x**2 + self.curve.A*x + 1)*x
+
+            # (y^p - y)² = (y²)^p + y² -2y^(p+1) = 2 ( Re(y²) - Norm(y) )
+            normy = GFp( y2**((x.parent().characteristic() + 1) // 2) )
+            num = 2 * (y2.polynomial()[0] - normy)
+
+            # (x^p - x)² = -4 Im(x)
+            den = -4 * x.polynomial()[1]**2
+
+            return Point(num/den - image.A - 2*x.polynomial()[0], 1, image)
     
     def get_P4(self, k) :
         '''

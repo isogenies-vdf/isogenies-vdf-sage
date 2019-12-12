@@ -134,7 +134,7 @@ class VDF_GFp2(VerifiableDelayFunction):
         'Evaluate the VDF at point Q'
         for E in self.walk_data:
             (Q,) = E.isogeny_backward(Q)
-        return point.Point(Q.trace(), 1, self.setup.E0)
+        return Q.trace(self.setup.E0)
 
     def verify(self, Q, fQ):
         'Verify that fQ = VDF(Q)'

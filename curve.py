@@ -27,6 +27,7 @@ class Curve:
         
         self.field = alpha.parent()
         self.is_on_gfp = self.field.is_prime_field()
+        self.non_square = -1 if self.is_on_gfp else setup.non_square_GFp2
         self.setup = setup
         
     @property
@@ -82,13 +83,15 @@ class Curve:
         '''
         if u == 0 or u == 1:
             raise ValueError('Elligator parameter must be ≥ 2.')
-        u2 = u**2
-        u21 = u2 - 1
-        t = self.A * u21 * (u2 * self.A**2 + u21 ** 2)
+        ru2 = self.non_square * u**2
+        ru21 = ru2 + 1
+        t = self.A * ru21 * (ru2 * self.A**2 - ru21 ** 2)
+        if t == 0:
+            raise ValueError('Elligator paramater must not be a root of the equation')
         if t.is_square() != twist:
-            return point.Point(self.A, u21, self)
+            return point.Point(-self.A, ru21, self)
         else:
-            return point.Point(-self.A * u2, u21, self)
+            return point.Point(-self.A * ru2, ru21, self)
 
     def iterelligator(self, twist=False, deterministic=True):
         '''
@@ -140,13 +143,11 @@ class Curve:
             NP = self.setup.N * P
             NP2 = NP
             order2 = 0
-            while not NP2.is_zero() and order2 <= self.setup.n:
+            while not NP2.is_zero():
                 order2 += 1
                 NP2 = 2*NP2
             if order2 < n:
                 continue
-            if order2 > self.setup.n:
-                raise RuntimeError('Something went wrong')
 
             if N == False:
                 return 2**(order2 - n) * NP

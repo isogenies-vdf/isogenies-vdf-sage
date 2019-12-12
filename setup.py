@@ -45,6 +45,12 @@ class TrustedSetup:
         return self.GFp.extension(poly, name='i')
 
     @property
+    def non_square_GFp2(self):
+        'A non-square element in GFp2'
+        i = self.GFp2.gen()
+        return next(i + x for x in self.GFp if not (i + x).is_square())
+    
+    @property
     def E0(self):
         'The staring curve'
         return curve.Curve(self.alpha, self)

@@ -33,4 +33,4 @@ if __name__ == '__main__':
         print('Testing GF(p) VDF')
         test_vdf(s, 100)
         print('Testing GF(p²) VDF')
-        test_vdf(s, 100, vdf.VDF_GFp2)
+        test_vdf(s, 10, vdf.VDF_GFp2)
