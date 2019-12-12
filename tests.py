@@ -22,9 +22,6 @@ def test_vdf(setup, delay, vdfclass=vdf.VDF_GFp, reps=10):
         assert vdf.verify(Q, fQ)
 
 if __name__ == '__main__':
-    from sage.structure.proof.all import arithmetic
-    arithmetic(False)
-    
     for key, s in setup.SETUPS.items():
         print('\n==== %s ====' % key)
         print('Testing isogeny formula')
