@@ -37,7 +37,7 @@ class Curve:
     @property
     def j(self):
         return 256 * (self.A**2 - 3)**3 / (self.A**2 - 4)
-    
+
     def __repr__(self):
         return 'Montgomery curve y² = x³ + (%r) x² + x' % self.A
 
