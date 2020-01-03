@@ -108,7 +108,7 @@ class Curve:
         '''
         it = iter(self.field)
         while True:
-            u = it.next() if deterministic else self.field.random_element()
+            u = next(it) if deterministic else self.field.random_element()
             try:
                 yield self.elligator(u, twist)
             except ValueError:
@@ -139,7 +139,7 @@ class Curve:
             n = self.max_2_torsion
         
         while True:
-            P = self.setup.f * it.next()
+            P = self.setup.f * next(it)
             NP = self.setup.N * P
             NP2 = NP
             order2 = 0
