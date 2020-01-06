@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import curve, point, pairing
+from sage.schemes.elliptic_curves.constructor import EllipticCurve
 import logging
 
 class VerifiableDelayFunction():
@@ -17,10 +18,6 @@ class VerifiableDelayFunction():
         self.P = self.setup.E0.point_of_order(N=True, n=0, twist=True, deterministic=True)
         self.E1, self.fP, self.walk_data = self._setup_walk()
 
-    def random_input(self):
-        'Sample a random input point for the VDF'
-        return self.E1.point_of_order(N=True, n=0, twist=False, deterministic=False)
-        
     def __repr__(self):
         return 'Verifiable delay function with delay %d' % self.delay
 
@@ -59,6 +56,10 @@ class VDF_GFp(VerifiableDelayFunction):
 
         return E, fP, ek
 
+    def random_input(self):
+        'Sample a random input point for the VDF'
+        return self.E1.point_of_order(N=True, n=0, twist=False, deterministic=False)
+
     def evaluate(self, Q):
         'Evaluate the VDF at point Q'
         for E in self.walk_data:
@@ -73,25 +74,16 @@ class VDF_GFp(VerifiableDelayFunction):
 
         E0 = self.setup.E0.to_gfp2()
         E1 = self.E1.to_gfp2()
-        e1 = self.P.weierstrass(E0).weil_pairing(fQ.weierstrass(E0), self.setup.N)
-        e2 = self.fP.weierstrass(E1).weil_pairing(Q.weierstrass(E1), self.setup.N)
         
-        # # Convert to Weierstrass
-        # P_ws = self.P.weierstrass()
-        # fP_ws = self.fP.weierstrass()
-        # Q_ws = Q.weierstrass()
-        # fQ_ws = fQ.weierstrass()
-
-        # _Z, mil11 = pairing.miller(fQ_ws, P_ws, self.setup.N, denominator=False)
-        # e1 = pairing.exponentiation(self.setup, mil11[0]/mil11[1])
-        # logging.debug('f_{N, fQ}(P) = %r', mil11)
-        # logging.debug('e(fQ, P) = %r', e1)
-
-        # _Z, mil22 = pairing.miller(Q_ws, fP_ws, self.setup.N, denominator=False)
-        # e2 = pairing.exponentiation(self.setup, mil22[0]/mil22[1])
-        # logging.debug('f_{N, Q}(fP) = %r', mil22)
-        # logging.debug('e(Q, fP) = %r', e2)
-
+        EE0 = EllipticCurve(E0.field, [0,E0.A,0,1,0])
+        PP =   self.P.get_coordinates(EE0)
+        fQQ =  fQ.get_coordinates(EE0)
+        EE1 = EllipticCurve(E1.field, [0,E1.A,0,1,0])
+        fPP =  self.fP.get_coordinates(EE1)
+        QQ =  Q.get_coordinates(EE1)
+        
+        e1 = pairing.tate(PP, fQQ, E0, denominator=True)
+        e2 = pairing.tate(fPP, QQ, E1, denominator=True)
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
 
 
@@ -130,6 +122,19 @@ class VDF_GFp2(VerifiableDelayFunction):
 
         return E, fP, ek
 
+    def random_input(self):
+        'Sample a random input point for the VDF'
+        Q = self.E1.point_of_order(N=True, n=0, twist=False, deterministic=False)
+        # with real parameters, it never happen that Q is in Y_1
+        # here we need to check a pairing equation...
+        EE = EllipticCurve(Q.curve.field, [0,Q.curve.A,0,1,0])
+        QQ = Q.get_coordinates(EE)
+        fPP = self.fP.get_coordinates(EE)
+        while (QQ.weil_pairing(fPP, self.setup.N) == 1):
+            Q = self.E1.point_of_order(N=True, n=0, twist=False, deterministic=False)
+            QQ = Q.get_coordinates(EE)
+        return Q
+
     def evaluate(self, Q):
         'Evaluate the VDF at point Q'
         for E in self.walk_data:
@@ -138,22 +143,19 @@ class VDF_GFp2(VerifiableDelayFunction):
 
     def verify(self, Q, fQ):
         'Verify that fQ = VDF(Q)'
-        
-        if not(fQ in self.setup.E0) or fQ.is_zero() or not (self.setup.N*fQ).is_zero():
+        if not(fQ in self.setup.E0.to_gfp2()) or fQ.is_zero() or not (self.setup.N*fQ).is_zero():
             return False
 
         E0 = self.setup.E0.to_gfp2()
-        e1 = self.P.weierstrass(E0).weil_pairing(fQ.weierstrass(E0), self.setup.N)
-        e2 = self.fP.weierstrass(self.E1).weil_pairing(Q.weierstrass(self.E1), self.setup.N)**2
-
-        # _Z, mil11 = pairing.miller(fQ_ws, P_ws, self.setup.N, denominator=False)
-        # e1 = pairing.exponentiation(self.setup, mil11[0]/mil11[1])
-        # logging.debug('f_{N, fQ}(P) = %r', mil11)
-        # logging.debug('e(fQ, P) = %r', e1)
-
-        # _Z, mil22 = pairing.miller(Q_ws, fP_ws, self.setup.N, denominator=True)
-        # e2_squared = pairing.exponentiation(self.setup, mil22[0]/mil22[1])**2
-        # logging.debug('f_{N, Q}(fP) = %r', mil22)
-        # logging.debug('e(Q, fP)² = %r', e2_squared)
+        EE0 = EllipticCurve(E0.field, [0,E0.A,0,1,0])
+        PP =   self.P.get_coordinates(EE0)
+        fQQ =  fQ.get_coordinates(EE0)
+        e1 = pairing.tate(PP, fQQ, E0, denominator=True)
+        E1 = self.E1.to_gfp2()
+        EE1 = EllipticCurve(E1.field, [0,E1.A,0,1,0])
+        fPP =  self.fP.get_coordinates(EE1)
+        QQ =  Q.get_coordinates(EE1)
+        e2 = pairing.tate(fPP, QQ, E1, denominator=True)**2
 
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
+
