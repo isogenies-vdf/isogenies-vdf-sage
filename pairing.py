@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*- 
 
 def eval_line(R, P, Q) :
-    """
+    '''
     INPUT: 
-    * R a point of an EllipticCurve object
-    * P a point of an EllipticCurve object
-    * Q a point of an EllipticCurve object
+    - R a point of an EllipticCurve object
+    - P a point of an EllipticCurve object
+    - Q a point of an EllipticCurve object
     OUPUT:
-    * The line through P and R evaluated at Q, given with the numerator and
+    - The line through P and R evaluated at Q, given with the numerator and
       the denominator.
-    * The point P+R
-    """
+    - The point P+R
+    '''
     if Q.is_zero():
         raise ValueError("Q must be nonzero.")
 
@@ -26,7 +26,7 @@ def eval_line(R, P, Q) :
             return [P.curve()(0), [Q[0] - P[0], 1]]
         else:
             lnum, lden = (R[1] - P[1]), (R[0] - P[0])
-            xPplusR = (lnum**2) - (lden**2)*(P[0] + R[0])
+            xPplusR = (lnum**2) - (lden**2)*(P.curve().a2() + P[0] + R[0])
             yPplusR = R[1]*(lden**3) + lnum*(xPplusR - (lden**2)*R[0])
             zPplusR = lden**3
             PplusR = P.curve()(lden*xPplusR, -yPplusR, zPplusR)
@@ -39,14 +39,22 @@ def eval_line(R, P, Q) :
             return [P.curve()(0), [Q[0] - P[0], 1]] #except in characteristic 2 ?
         else:
             #l = numerator/denominator
-            x2P = numerator**2 - 2* P[0]*denominator**2
-            y2P = P[1]*denominator**3 + numerator*(x2P - (denominator**2) *P[0])
+            x2P = numerator**2 - (P.curve().a2() + 2* P[0]) * denominator**2
+            y2P = P[1]*denominator**3 + numerator*(x2P - denominator**2 * P[0])
             z2P = denominator**3
             twoP = P.curve()(denominator*x2P, -y2P, z2P)
             return [twoP, [denominator * (Q[1] - P[1]) - numerator * (Q[0] - P[0]), denominator]]
 
 def miller(P, Q, n, denominator=False) :
-    # return the miller loop f_{P, n}(Q) for an even embedded degree curve
+    '''
+    INPUT:
+    - P a point of an EllipticCurve object
+    - Q a point of an EllipticCurve object
+    - n an integer (the Miller loop)
+    OUPUT:
+    - the point [n]P
+    - the Miller loop f_{P, n}(Q) in the context of our curves, given with numerator and denominator.
+    '''
     if Q.is_zero():
         raise ValueError("Q must be nonzero.")
     if n == 0:
@@ -85,13 +93,13 @@ def miller(P, Q, n, denominator=False) :
     return [S, [t_num,t_den]]
 
 
-def exponentiation(setup, x) :
-    """
+def exponentiation(setup, x):
+    '''
     INPUT: 
     * x an element of Fp2
     OUTPUT:
     * x**((p**2-1)//N) in our special case where (p**2 - 1)//N == f* 2**(n+1) * (2**(n-1) * f * N - 1)
-    """
+    '''
     x1 = (x**setup.f)
     for i in range(setup.n+1) :
         x1 = x1**2
@@ -100,3 +108,15 @@ def exponentiation(setup, x) :
     for i in range(setup.n-1) :
         x3 = x3**2
     return x3/x2
+
+def tate(P, Q, E, denominator=True):
+    '''
+    INPUT:
+    - P a point of an EllipticCurve object
+    - Q a point of an EllipticCurve object
+    - E an elliptic curve object
+    OUPUT:
+    - the Tate pairing T(P, Q)
+    '''
+    mill_nd = miller(P, Q, E.setup.N, denominator=denominator)[1]
+    return exponentiation(E.setup, mill_nd[0] / mill_nd[1])
