@@ -4,7 +4,6 @@
 import setup, curve, point, vdf, pairing
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 
-
 def test_isog(E):
     '''
     Test that composing isogenies forth and back equals mul by 4.
@@ -84,6 +83,20 @@ def test_tate(E, reps=10):
         assert pairing.tate(PP, 2*QQ, E, denominator=True) == pairing.tate(2*PP, QQ, E, denominator=True)
         assert pairing.tate(PP, QQ, E, denominator=True)**2 == pairing.tate(2*PP, QQ, E, denominator=True)
         i+=1
+    # Check the pairing computation without denominators
+    if E.field.is_prime_field() :
+        i = 0
+        while i<reps:
+            P =  E.point_of_order(N=True, n=0, twist=False, deterministic=False)
+            PP = P.get_coordinates(EE)
+            Q = E.point_of_order(N=True, n=0, twist=True, deterministic=False)
+            #while Q.x/Q.z in E.field:
+            #    Q = E_Fp2.point_of_order(N=True, n=0, twist=False, deterministic=False)
+            QQ = Q.get_coordinates(EE)
+            assert pairing.tate(PP, 2*QQ, E, denominator=True) == pairing.tate(2*PP, QQ, E, denominator=False)
+            assert pairing.tate(PP, QQ, E, denominator=True)**2 == pairing.tate(2*PP, QQ, E, denominator=False)
+            i+=1
+
 
 if __name__ == '__main__':
     for key, s in setup.SETUPS.items():
