@@ -20,7 +20,7 @@ class Curve:
     
     def __init__(self, alpha, setup):
         if (alpha + 1)**4 == 4:
-            raise ValueError('Curve is singuar (alpha=%d)' % alpha)
+            raise ValueError('Curve is singular (alpha=%d)' % alpha)
         if alpha**2 == -1:
             raise ValueError('Trying to build curve with j=1728.\n Either you did something wrong, or you are very unlucky.')
         self.alpha = alpha
