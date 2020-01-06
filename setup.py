@@ -71,3 +71,4 @@ SETUPS = {
 def setup_list():
     'Print the list of predefined setups'
     return '\n'.join('%s:\n  %s' % i for i in SETUPS.items())
+
