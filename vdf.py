@@ -82,8 +82,9 @@ class VDF_GFp(VerifiableDelayFunction):
         fPP =  self.fP.get_coordinates(EE1)
         QQ =  Q.get_coordinates(EE1)
         
-        e1 = pairing.tate(PP, fQQ, E0, denominator=True)
-        e2 = pairing.tate(fPP, QQ, E1, denominator=True)
+        # Computation without denominator
+        e1 = pairing.tate(PP, fQQ, E0, denominator=False)
+        e2 = pairing.tate(fPP, QQ, E1, denominator=False)
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
 
 
