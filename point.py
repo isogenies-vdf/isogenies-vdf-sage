@@ -119,10 +119,9 @@ class Point:
         # using affine coordinates, maybe not the best
         x = self.x / self.z
         GFp = image.field
-
         # deal with the special cases self ∈ ker(π-1) ∪ ker(π+1)
         if x in GFp:
-            if self in image:
+            if self in image.to_gfp2():
                 # double
                 tmp = Point(x, 1, image)
                 return 2*tmp
@@ -133,7 +132,7 @@ class Point:
         else:
             # using addition formula:
             #
-            #   (x,y) + (x^p,y^p) = (y^p-y)²/(x^p-x)₂ - A - (x^p+x)
+            #   (x,y) + (x^p,y^p) = (y^p-y)²/(x^p-x)² - A - (x^p+x)
             #
             # the code assumes GF(p²) is represented as GF(p)[i]
             y2 = (x**2 + self.curve.A*x + 1)*x
@@ -199,9 +198,15 @@ class Point:
                 raise RuntimeError('There is a problem in the isogeny computation.')
         return images
 
+
+    #### Conversion to XYZ coordinates
+    
+    def get_coordinates(self, E):
+        return E(self.x, (self.x**3/self.z + E.a2() * self.x**2 + self.x * self.z).sqrt(), self.z)
+
     #### Conversion to Weierstrass
     
-    def weierstrass(self, curve) :
+    def weierstrass(self, curve):
         '''
         INPUT:
 
