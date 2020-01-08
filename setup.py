@@ -4,6 +4,9 @@ import curve
 from sage.rings.integer_ring import ZZ
 from sage.rings.finite_rings.finite_field_constructor import FiniteField
 
+import sage.structure.proof.all as prf
+prf.arithmetic(False)
+
 class TrustedSetup:
     '''
     A class representing the parameters provided by a trusted setup, namely:
