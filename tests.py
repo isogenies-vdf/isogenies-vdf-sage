@@ -14,7 +14,6 @@ def test_isog(E):
         assert A == 2*B, 'Curve %r, %r != %r' % (E, A.normalize(), B.normalize())
     return E1
 
-
 def test_vdf(setup, delay, vdfclass=vdf.VDF_GFp, reps=10):
     vdf = vdfclass(setup, delay)
     for i in range(reps):
@@ -61,6 +60,13 @@ def test_miller(E, reps=10):
         ePQ2 = (n1/d1)**((p**2-1)//s.N*2)
         assert e2PQ == eP2Q and eP2Q == ePQ2
         i+=1
+
+def test_sqrt(curve, reps=10):
+    fp2 = curve.to_gfp2().field
+    list_squares = [(fp2.random_element())**2 for i in range(reps)]
+    for i in range(reps):
+        sqrt_u = curve._sqrt(list_squares[i])
+        assert sqrt_u**2 == list_squares[i]
 
 def test_exponentiation(setup, reps=10):
     F = setup.E0.field
@@ -119,3 +125,6 @@ if __name__ == '__main__':
         print('Testing Tate pairing')
         test_tate(s.E0)
         test_tate(E1)
+        print('Testing efficient square root')
+        test_sqrt(s.E0)
+        test_sqrt(E1)
