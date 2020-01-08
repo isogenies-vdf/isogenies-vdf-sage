@@ -26,9 +26,11 @@ def eval_line(R, P, Q) :
             return [P.curve()(0), [Q[0] - P[0], 1]]
         else:
             lnum, lden = (R[1] - P[1]), (R[0] - P[0])
+            t1 = lden**2
+            t2 = t1*lden
             xPplusR = (lnum**2) - (lden**2)*(P.curve().a2() + P[0] + R[0])
-            yPplusR = R[1]*(lden**3) + lnum*(xPplusR - (lden**2)*R[0])
-            zPplusR = lden**3
+            yPplusR = R[1]*(t2) + lnum*(xPplusR - (t1)*R[0])
+            zPplusR = t2
             PplusR = P.curve()(lden*xPplusR, -yPplusR, zPplusR)
             return [PplusR, [lden * (Q[1] - P[1])  - lnum * (Q[0] - P[0]), lden]]
     else:
@@ -39,9 +41,11 @@ def eval_line(R, P, Q) :
             return [P.curve()(0), [Q[0] - P[0], 1]] #except in characteristic 2 ?
         else:
             #l = numerator/denominator
-            x2P = numerator**2 - (P.curve().a2() + 2* P[0]) * denominator**2
-            y2P = P[1]*denominator**3 + numerator*(x2P - denominator**2 * P[0])
-            z2P = denominator**3
+            t1 = denominator**2
+            t2 = t1 * denominator
+            x2P = numerator**2 - (P.curve().a2() + 2* P[0]) * t1
+            y2P = P[1]*t2 + numerator*(x2P - t1 * P[0])
+            z2P = t2
             twoP = P.curve()(denominator*x2P, -y2P, z2P)
             return [twoP, [denominator * (Q[1] - P[1]) - numerator * (Q[0] - P[0]), denominator]]
 
