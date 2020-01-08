@@ -4,6 +4,9 @@
 import setup, curve, point, vdf, pairing
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 
+import sage.structure.proof.all as prf
+prf.arithmetic(False)
+
 def test_isog(E):
     '''
     Test that composing isogenies forth and back equals mul by 4.
