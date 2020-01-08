@@ -9,6 +9,12 @@ where:
 - `PSIZE` is `p14-toy`, `p89-toy` or `p1506`
 - `NBITERATIONS` is the number of 2-isogenies to compute for the evaluation.
 
+# Test
+`sage tests.py`
+
+#Bench
+`sage benchs.py`
+
 # Issues.
 
 - One pairing on the verify step can be done before the answer of vdf_eval.
