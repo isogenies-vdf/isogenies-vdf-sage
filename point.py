@@ -202,7 +202,11 @@ class Point:
     #### Conversion to XYZ coordinates
     
     def get_coordinates(self, E):
-        return E(self.x, (self.x**3/self.z + E.a2() * self.x**2 + self.x * self.z).sqrt(), self.z)
+        '''
+        return the point on the EllipticCurve object (with y with a sign)
+        '''
+        t = self.x**3/self.z + E.a2() * self.x**2 + self.x * self.z
+        return E(self.x, self.curve._sqrt(t), self.z)
 
     #### Conversion to Weierstrass
     
