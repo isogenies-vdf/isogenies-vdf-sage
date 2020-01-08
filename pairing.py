@@ -28,17 +28,17 @@ def eval_line(R, P, Q) :
             lnum, lden = (R[1] - P[1]), (R[0] - P[0])
             t1 = lden**2
             t2 = t1*lden
-            xPplusR = (lnum**2) - (lden**2)*(P.curve().a2() + P[0] + R[0])
+            xPplusR = (lnum**2) - t1*(P.curve().a2() + P[0] + R[0])
             yPplusR = R[1]*(t2) + lnum*(xPplusR - (t1)*R[0])
             zPplusR = t2
-            PplusR = P.curve()(lden*xPplusR, -yPplusR, zPplusR)
+            PplusR = P.curve().point([lden*xPplusR, -yPplusR, zPplusR], check=False)
             return [PplusR, [lden * (Q[1] - P[1])  - lnum * (Q[0] - P[0]), lden]]
     else:
         a1, a2, a3, a4, a6 = P.curve().a_invariants()
         numerator = (3*P[0]**2 + 2*a2*P[0] + a4 - a1*P[1])
         denominator = (2*P[1] + a1*P[0] + a3)
         if denominator == 0:
-            return [P.curve()(0), [Q[0] - P[0], 1]] #except in characteristic 2 ?
+            return [P.curve().point(0), [Q[0] - P[0], 1]] #except in characteristic 2 ?
         else:
             #l = numerator/denominator
             t1 = denominator**2
@@ -46,7 +46,7 @@ def eval_line(R, P, Q) :
             x2P = numerator**2 - (P.curve().a2() + 2* P[0]) * t1
             y2P = P[1]*t2 + numerator*(x2P - t1 * P[0])
             z2P = t2
-            twoP = P.curve()(denominator*x2P, -y2P, z2P)
+            twoP = P.curve().point([denominator*x2P, -y2P, z2P], check=False)
             return [twoP, [denominator * (Q[1] - P[1]) - numerator * (Q[0] - P[0]), denominator]]
 
 def miller(P, Q, n, denominator=False) :
@@ -69,7 +69,7 @@ def miller(P, Q, n, denominator=False) :
         n_is_negative = True
     t_num, t_den = 1, 1
     V = P
-    S = 2*V # V=P is in affine coordinates
+    S = 2*V
     nbin = n.bits()
     i = n.nbits() - 2
     while i > -1:
