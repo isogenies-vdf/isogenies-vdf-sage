@@ -157,14 +157,48 @@ class Curve:
                     continue
                 return P
 
-    def _sqrt(self, a, principal=True):
-        if principal and self.is_on_gfp:
-            rt = a**((self.setup.p + 1) // 4)
-            assert rt**2 == a
-            return rt
+    def _sqrt_expo(self, u):
+        '''
+        Compute u^((p+1)//4)
+        '''
+        if u == 0:
+            return 0
         else:
-            return choice((1,-1)) * a.sqrt()
-            
+            # exponentation to the power (p+1)/4 = 2^(n-2) * f * N
+            t = u
+            for i in range(self.setup.n-2) :
+                t = t**2
+            return t**(self.setup.f * self.setup.N)
+
+    def _sqrt(self, u):
+        '''
+        Compute the square root of u if it is in Fp2.
+        '''
+        if u == 0:
+            return 0
+        if u.polynomial().degree() == 0: # u in Fp
+            t = self._sqrt_expo(u)
+            if t**2 == u:
+                return t
+            else:
+                return self.to_gfp2().field.gen() * t
+        else:
+            if not(u.is_square()):
+                raise ValueError("No square root defined over Fp2")
+            # Fp2 = Fp(i) so we can compute the root in two roots over Fp :
+            [a,b] = u.polynomial().list()
+            n = self._sqrt_expo(a**2+b**2)
+            z = (a + n)/2
+            #print((a**2+b**2).is_square())
+            if not(z.is_square()) :
+                z = (a - n)/2
+            alpha = self._sqrt_expo(z)
+            beta = b/(2*alpha)
+            if alpha**2 == z:
+                return choice((1,-1)) * u.parent()([alpha,beta])
+            else:
+                return choice((1,-1)) * u.parent()([beta,-alpha])
+
     def isogeny_forward(self, points, principal=True):
         '''
         Compute and evaluate the degree 2 isogeny with kernel alpha.
