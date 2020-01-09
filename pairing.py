@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*- 
+from copy import copy
 
 def eval_line(R, P, Q) :
     '''
@@ -15,39 +16,70 @@ def eval_line(R, P, Q) :
         raise ValueError("Q must be nonzero.")
 
     if P.is_zero() or R.is_zero():
-        if P == R:
+        if P[0]*R[2] == R[0] * P[2] and P[1]*R[2] == R[1] * P[2]:
             return [P, [P.curve().base_field().one(), 1]]
         if P.is_zero():
-            return [R, [Q[0] - R[0], 1]]
+            return [R, [R[2]* Q[0] - Q[2] * R[0], Q[2] * R[2]]]
         if R.is_zero():
-            return [P, [Q[0] - P[0], 1]]
+            return [P, [P[2] * Q[0] - Q[2] * P[0], Q[2] * P[2]]]
     elif P != R:
-        if P[0] == R[0]:
-            return [P.curve()(0), [Q[0] - P[0], 1]]
+        if P[0]*R[2] == P[2] * R[0]:
+            return [P.curve().point([0,1,0], check=False), [P[2] * Q[0] - Q[2] * P[0], Q[2] * P[2]]]
         else:
-            lnum, lden = (R[1] - P[1]), (R[0] - P[0])
-            t1 = lden**2
-            t2 = t1*lden
-            xPplusR = (lnum**2) - t1*(P.curve().a2() + P[0] + R[0])
-            yPplusR = R[1]*(t2) + lnum*(xPplusR - (t1)*R[0])
-            zPplusR = t2
-            PplusR = P.curve().point([lden*xPplusR, -yPplusR, zPplusR], check=False)
-            return [PplusR, [lden * (Q[1] - P[1])  - lnum * (Q[0] - P[0]), lden]]
+            n,d = (P[2] * R[1] - R[2] * P[1]), (P[2] * R[0] - R[2] * P[0])
+            '''
+            Formulas with normalization :
+            X = (n/d)² - (a+xp/zp + xr/zr)
+            Y = -(n/d * xpplusr + (d*yr - n*xr)/(d*zr))
+            Z = 1
+            and line
+            yq/zq - n/d * xq/zq - (d*yr-n*xr)/(d*zr)
+
+            which gives:
+
+            X = n² * zp * zr - d² * (zp*zr*a + zr*xp + zp*xr)
+            Y = -(n*xpplusr/d + d*zp*(d*yr - n*xr)) # TODO one inversion here
+            Z = d²*zp*zr
+            line_n = d*zr*yq - n*zr*xq - zq * (d*yr - n*xr)
+            line_d = d*zr*zq
+            '''
+            X = n**2 * P[2] * R[2] - d**2 * (P[2] * R[2] * P.curve().a2() + R[2]*P[0] + P[2]*R[0])
+            Y = -(n*X/d + d*P[2]*(d*R[1] - n*R[0])) # TODO one inversion here
+            Z = d**2 * P[2] * R[2]
+            PplusR = P.curve().point([X,Y,Z], check=False)
+            line_n = d*R[2] * Q[1] - n * R[2]*Q[0] - Q[2]*(d*R[1] - n*R[0])
+            line_d = d*R[2]*Q[2]
+            return [PplusR, [line_n, line_d]]
     else:
         a1, a2, a3, a4, a6 = P.curve().a_invariants()
-        numerator = (3*P[0]**2 + 2*a2*P[0] + a4 - a1*P[1])
-        denominator = (2*P[1] + a1*P[0] + a3)
-        if denominator == 0:
-            return [P.curve().point(0), [Q[0] - P[0], 1]] #except in characteristic 2 ?
+        n = (3*P[0]**2 + 2*a2*P[0]*P[2] + a4*P[2]**2 - a1*P[1]*P[2])
+        d = 2*P[1]*P[2] + a1*P[0]*P[2] + a3*P[2]**2
+        if d == 0:
+            return [P.curve().point([0,1,0], check=False), [P[2] * Q[0] - P[0]*Q[2], Q[2]* P[2]]] #except in characteristic 2 ?
         else:
-            #l = numerator/denominator
-            t1 = denominator**2
-            t2 = t1 * denominator
-            x2P = numerator**2 - (P.curve().a2() + 2* P[0]) * t1
-            y2P = P[1]*t2 + numerator*(x2P - t1 * P[0])
-            z2P = t2
-            twoP = P.curve().point([denominator*x2P, -y2P, z2P], check=False)
-            return [twoP, [denominator * (Q[1] - P[1]) - numerator * (Q[0] - P[0]), denominator]]
+            '''
+            Formulas with normalization :
+            X = (n/d)² - (a+2*xp/zp)
+            Y = -(n/d * xpplusr + (d*yp - n*xp)/(d*zp))
+            Z = 1
+            and line
+            yq/zq - n/d * xq/zq - (d*yp-n*xp)/(d*zp)
+
+            which gives:
+
+            X = n² * zp - d² * (zp*a + 2*xp)
+            Y = -(n*X/d + d*(d*yp - n*xp)) # TODO one inversion here
+            Z = d²*zp
+            line_n = d*zp*yq - n*zp*xq - zq * (d*yp - n*xp)
+            line_d = d*zp*zq
+            '''
+            X = n**2 * P[2] - d**2 * (P[2] * P.curve().a2() + 2*P[0])
+            Y = -(n*X/d + d*(d*P[1] - n*P[0])) # TODO one inveresion here
+            Z = d**2*P[2]
+            twoP = P.curve().point([X,Y,Z], check=False)
+            line_n = d*P[2] * Q[1] - n * P[2] * Q[0] - Q[2] *(d*P[1] - n*P[0])
+            line_d = d*P[2] * Q[2]
+            return [twoP, [line_n, line_d]]
 
 def miller(P, Q, n, denominator=False) :
     '''
@@ -69,14 +101,24 @@ def miller(P, Q, n, denominator=False) :
         n_is_negative = True
     t_num, t_den = 1, 1
     V = P
-    S = 2*V
+
+    # S = 2*V computed in projective coordinates formula (not done in sage)
+    a1, a2, a3, a4, a6 = V.curve().a_invariants()
+    ell_n = (3*V[0]**2 + 2*a2*V[0]*V[2] + a4*V[2]**2 - a1*V[1]*V[2])
+    ell_d = 2*V[1]*V[2] + a1*V[0]*V[2] + a3*V[2]**2
+    X = ell_n**2 * V[2] - ell_d**2 * (V[2] * P.curve().a2() + 2*V[0])
+    Y = -(ell_n*X/ell_d + ell_d*(ell_d*V[1] - ell_n*V[0])) # TODO one inveresion here
+    Z = ell_d**2*V[2]
+    S = V.curve().point([X,Y,Z], check=False)
+    
     nbin = n.bits()
     i = n.nbits() - 2
     while i > -1:
         [S, [ell_num, ell_den]] = eval_line(V, V, Q)
         t_num = (t_num**2)*ell_num
         if denominator :
-            [R, [vee_num, vee_den]] = eval_line(S, -S, Q)
+            minusS = S.curve().point([S[0], -S[1], S[2]], check=False)
+            [R, [vee_num, vee_den]] = eval_line(S, minusS, Q)
             t_den = (t_den**2)*ell_den*vee_num
             t_num *= vee_den
         V = S
@@ -84,7 +126,8 @@ def miller(P, Q, n, denominator=False) :
             [S, [ell_num, ell_den]] = eval_line(V, P, Q)
             t_num = t_num*ell_num
             if denominator :
-                [R, [vee_num, vee_den]] = eval_line(S, -S, Q)
+                minusS = S.curve().point([S[0], -S[1], S[2]], check=False)
+                [R, [vee_num, vee_den]] = eval_line(S, minusS, Q)
                 t_den *= ell_den*vee_num
                 t_num *= vee_den
             V = S
@@ -93,7 +136,7 @@ def miller(P, Q, n, denominator=False) :
         t_den = 1
     if n_is_negative :
         t_num, t_den = t_den, t_num
-        S = -S
+        S[1] *= -1
     return [S, [t_num,t_den]]
 
 
