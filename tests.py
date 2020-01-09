@@ -35,10 +35,10 @@ def test_eval_line(E, reps=10):
         QQ = Q.get_coordinates(EE)
         Sum,line = pairing.eval_line(PP, QQ, QQ)
         assert line[0] == 0
-        assert Sum == PP + QQ
+        assert Sum.curve()(Sum) == PP.curve()(PP) + PP.curve()(QQ)
         Sum2,line2 = pairing.eval_line(PP, PP, PP)
         assert line2[0] == 0
-        assert Sum2 == 2*PP
+        assert Sum2.curve()(Sum2) == 2*PP.curve()(PP)
         i+=1
 
 def test_miller(E, reps=10):
