@@ -26,7 +26,6 @@ def eval_line(R, P, Q) :
         if P[0]*R[2] == P[2] * R[0]:
             return [P.curve().point([0,1,0], check=False), [P[2] * Q[0] - Q[2] * P[0], Q[2] * P[2]]]
         else:
-            n,d = (P[2] * R[1] - R[2] * P[1]), (P[2] * R[0] - R[2] * P[0])
             '''
             Formulas with normalization :
             X = (n/d)² - (a+xp/zp + xr/zr)
@@ -43,15 +42,20 @@ def eval_line(R, P, Q) :
             line_n = d*zr*yq - n*zr*xq - zq * (d*yr - n*xr)
             line_d = d*zr*zq
             '''
-            t1 = d**2
-            t2 = d*R[2]
-            t3 = n*R[0]
-            X = n**2 * P[2] * R[2] - t1 * (P[2] * R[2] * P.curve().a2() + R[2]*P[0] + P[2]*R[0])
-            Y = -(n*X/d + d*P[2]*(d*R[1] - t3)) # TODO one inversion here
-            Z = t1 * P[2] * R[2]
+            t1 = P[2] * R[0]
+            t2 = P[0] * R[2]
+            n = P[2] * R[1] - R[2] * P[1]
+            d = t1 - t2
+            t3 = d**2
+            t4 = d*R[2]
+            t5 = n*R[0]
+            t6 = P[2] * R[2]
+            X = n**2 * t6 - t3 * (t6 * P.curve().a2() + t2 + t1)
+            Y = -n*X/d - d*P[2]*(d*R[1] - t5) # TODO one inversion here
+            Z = t3 * t6
             PplusR = P.curve().point([X,Y,Z], check=False)
-            line_n = t2 * Q[1] - n * R[2]*Q[0] - Q[2]*(d*R[1] - t3)
-            line_d = t2*Q[2]
+            line_n = t4 * Q[1] - n * R[2]*Q[0] - Q[2]*(d*R[1] - t5)
+            line_d = t4*Q[2]
             return [PplusR, [line_n, line_d]]
     else:
         a1, a2, a3, a4, a6 = P.curve().a_invariants()
@@ -79,12 +83,11 @@ def eval_line(R, P, Q) :
             line_n = d*zp*yq - n*zp*xq - zq * (d*yp - n*xp)
             line_d = d*zp*zq
             '''
-            
             t1 = d**2
             t2 = d*P[2]
             t3 = n*P[0]
             X = n**2 * P[2] - t1 * (P[2] * P.curve().a2() + 2*P[0])
-            Y = -(n*X/d + d*(d*P[1] - t3)) # TODO one inveresion here
+            Y = -n*X/d - d*(d*P[1] - t3) # TODO one inveresion here
             Z = t1*P[2]
             twoP = P.curve().point([X,Y,Z], check=False)
             line_n = t2 * Q[1] - n * P[2] * Q[0] - Q[2] *(d*P[1] - t3)
@@ -117,7 +120,7 @@ def miller(P, Q, n, denominator=False) :
     ell_n = (3*V[0]**2 + 2*a2*V[0]*V[2] + a4*V[2]**2 - a1*V[1]*V[2])
     ell_d = 2*V[1]*V[2] + a1*V[0]*V[2] + a3*V[2]**2
     X = ell_n**2 * V[2] - ell_d**2 * (V[2] * P.curve().a2() + 2*V[0])
-    Y = -(ell_n*X/ell_d + ell_d*(ell_d*V[1] - ell_n*V[0])) # TODO one inveresion here
+    Y = -ell_n*X/ell_d - ell_d*(ell_d*V[1] - ell_n*V[0]) # TODO one inveresion here
     Z = ell_d**2*V[2]
     S = V.curve().point([X,Y,Z], check=False)
     
