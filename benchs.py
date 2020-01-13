@@ -5,9 +5,6 @@ import setup, curve, point, vdf, pairing
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 from sage.misc.misc import cputime
 
-import sage.structure.proof.all as prf
-prf.arithmetic(False)
-
 def bench_sqrt(curve, reps=10):
     '''
     Compute a list of reps squares and benchmark the sqrt() and our _sqrt

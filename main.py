@@ -1,9 +1,6 @@
 #!/usr/bin/env sage
 # -*- coding: utf-8 -*-
 
-from sage.structure.proof.all import arithmetic
-arithmetic(False)
-
 import vdf
 from setup import SETUPS, setup_list
 import argparse, sys, logging
