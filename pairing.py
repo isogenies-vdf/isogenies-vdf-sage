@@ -58,12 +58,13 @@ def eval_line(R, P, Q) :
             line_d = t4*Q[2]
             return [PplusR, [line_n, line_d]]
     else:
-        a1, a2, a3, a4, a6 = P.curve().a_invariants()
+        a2 = P.curve().a2()
         t1 = P[0] * P[2]
         t2 = P[1] * P[2]
         t3 = P[2]**2
-        n = (3*P[0]**2 + 2*a2*t1 + a4*t3 - a1*t2)
-        d = 2*t2 + a1*t1 + a3*t3
+        # Using montgomery curve, a1, a3, a6 = 0 and a4 = 1.
+        n = 3*P[0]**2 + 2*a2*t1 + t3
+        d = 2*t2
         if d == 0:
             return [P.curve().point([0,1,0], check=False), [P[2] * Q[0] - P[0]*Q[2], Q[2]* P[2]]] #except in characteristic 2 ?
         else:
