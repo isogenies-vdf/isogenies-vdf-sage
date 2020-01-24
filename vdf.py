@@ -23,6 +23,10 @@ class VerifiableDelayFunction():
 
     __str__ = __repr__
 
+    def random_input(self):
+        'Sample a random input point for the VDF'
+        return self.E1.point_of_order(N=True, n=0, twist=False, deterministic=False)
+
 
 class VDF_GFp(VerifiableDelayFunction):
     '''
@@ -55,10 +59,6 @@ class VDF_GFp(VerifiableDelayFunction):
         ek.reverse()
 
         return E, fP, ek
-
-    def random_input(self):
-        'Sample a random input point for the VDF'
-        return self.E1.point_of_order(N=True, n=0, twist=False, deterministic=False)
 
     def evaluate(self, Q):
         'Evaluate the VDF at point Q'
@@ -122,19 +122,6 @@ class VDF_GFp2(VerifiableDelayFunction):
         ek.reverse()
 
         return E, fP, ek
-
-    def random_input(self):
-        'Sample a random input point for the VDF'
-        Q = self.E1.point_of_order(N=True, n=0, twist=False, deterministic=False)
-        # with real parameters, it never happen that Q is in Y_1
-        # here we need to check a pairing equation...
-        EE = EllipticCurve(Q.curve.field, [0,Q.curve.A,0,1,0])
-        QQ = Q.get_coordinates(EE)
-        fPP = self.fP.get_coordinates(EE)
-        while (QQ.weil_pairing(fPP, self.setup.N) == 1):
-            Q = self.E1.point_of_order(N=True, n=0, twist=False, deterministic=False)
-            QQ = Q.get_coordinates(EE)
-        return Q
 
     def evaluate(self, Q):
         'Evaluate the VDF at point Q'
