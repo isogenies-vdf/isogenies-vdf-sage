@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import curve, point, pairing
+import curve, point, pairing, pairing_fp
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 import logging
 
@@ -17,6 +17,8 @@ class VerifiableDelayFunction():
         
         self.P = self.setup.E0.point_of_order(N=True, n=0, twist=True, deterministic=True)
         self.E1, self.fP, self.walk_data = self._setup_walk()
+        self.E0_fp2 = self.setup.E0.to_gfp2()
+        self.E1_fp2 = self.E1.to_gfp2()
 
     def __repr__(self):
         return 'Verifiable delay function with delay %d' % self.delay
@@ -72,19 +74,19 @@ class VDF_GFp(VerifiableDelayFunction):
         if not fQ in self.setup.E0 or fQ.is_zero() or not (self.setup.N*fQ).is_zero():
             return False
 
-        E0 = self.setup.E0.to_gfp2()
-        E1 = self.E1.to_gfp2()
-        
+        E0 = self.E0_fp2
+        E1 = self.E1_fp2
+
         EE0 = EllipticCurve(E0.field, [0,E0.A,0,1,0])
         PP =   self.P.get_coordinates(EE0)
         fQQ =  fQ.get_coordinates(EE0)
+
         EE1 = EllipticCurve(E1.field, [0,E1.A,0,1,0])
         fPP =  self.fP.get_coordinates(EE1)
         QQ =  Q.get_coordinates(EE1)
-        
-        # Computation without denominator
-        e1 = pairing.tate(PP, fQQ, E0, denominator=False)
-        e2 = pairing.tate(fPP, QQ, E1, denominator=False)
+
+        e1 = pairing_fp.tate(self.setup, fQQ, PP, denominator=False)
+        e2 = pairing_fp.tate(self.setup, QQ, fPP, denominator=False)
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
 
 
