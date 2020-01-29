@@ -74,14 +74,11 @@ class VDF_GFp(VerifiableDelayFunction):
         if not fQ in self.setup.E0 or fQ.is_zero() or not (self.setup.N*fQ).is_zero():
             return False
 
-        E0 = self.E0_fp2
-        E1 = self.E1_fp2
-
-        EE0 = EllipticCurve(E0.field, [0,E0.A,0,1,0])
+        EE0 = self.E0_fp2.weierstrass()
         PP =   self.P.get_coordinates(EE0)
         fQQ =  fQ.get_coordinates(EE0)
 
-        EE1 = EllipticCurve(E1.field, [0,E1.A,0,1,0])
+        EE1 = self.E1_fp2.weierstrass()
         fPP =  self.fP.get_coordinates(EE1)
         QQ =  Q.get_coordinates(EE1)
 
@@ -136,16 +133,19 @@ class VDF_GFp2(VerifiableDelayFunction):
         if not(fQ in self.setup.E0.to_gfp2()) or fQ.is_zero() or not (self.setup.N*fQ).is_zero():
             return False
 
-        E0 = self.setup.E0.to_gfp2()
-        EE0 = EllipticCurve(E0.field, [0,E0.A,0,1,0])
+        EE0 = self.E0_fp2.weierstrass()
         PP =   self.P.get_coordinates(EE0)
         fQQ =  fQ.get_coordinates(EE0)
-        e1 = pairing.tate(PP, fQQ, E0, denominator=True)
-        E1 = self.E1.to_gfp2()
-        EE1 = EllipticCurve(E1.field, [0,E1.A,0,1,0])
+
+        E1 = self.E1_fp2
+        EE1 = E1.weierstrass()
         fPP =  self.fP.get_coordinates(EE1)
         QQ =  Q.get_coordinates(EE1)
-        e2 = pairing.tate(fPP, QQ, E1, denominator=True)**2
 
+        # we can use the same computation as for the fp vdf verification
+        # instead of:
+        # e1 = pairing.tate(PP, fQQ, E0, denominator=True)
+        e1 = pairing_fp.tate(self.setup, fQQ, PP, denominator=False)
+        e2 = pairing.tate(fPP, QQ, E1, denominator=True)**2
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
 
