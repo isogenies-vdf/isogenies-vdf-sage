@@ -142,8 +142,8 @@ class VDF_GFp2(VerifiableDelayFunction):
         fPP =  self.fP.get_coordinates(EE1)
         QQ =  Q.get_coordinates(EE1)
 
-        # we can use the same computation as for the fp vdf verification
-        e1 = pairing.tate(self.setup, fQQ, PP, denominator=False)
+        # on the special initial curve we could set denominator=False
+        e1 = pairing.tate(self.setup, fQQ, PP, denominator=True)
         e2 = pairing.tate(self.setup, fPP, QQ, denominator=True)**2
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
 
