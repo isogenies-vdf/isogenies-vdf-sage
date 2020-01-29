@@ -31,6 +31,8 @@ def test_double_line_jac(E, reps=10):
         while P.is_zero():
             P = EE.random_point()
         u = E.field.random_element()
+        while u == 0 :
+            u = E.field.random_element()
         S_j = (S[0]*u**2, S[1]*u**3, u)
         [l, dblS] = pairing.double_line_jac(S_j, P, EE.a2())
         assert (dblS[2] == 0 and S[1] == 0) or 2*S == EE.point([dblS[0]/dblS[2]**2, dblS[1]/dblS[2]**3])
@@ -145,4 +147,3 @@ if __name__ == '__main__':
         print('Testing efficient square root')
         test_sqrt(s.E0)
         test_sqrt(E1)
-
