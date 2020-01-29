@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import curve, point, pairing, pairing_fp
+import curve, point, pairing
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 import logging
 
@@ -82,8 +82,8 @@ class VDF_GFp(VerifiableDelayFunction):
         fPP =  self.fP.get_coordinates(EE1)
         QQ =  Q.get_coordinates(EE1)
 
-        e1 = pairing_fp.tate(self.setup, fQQ, PP, denominator=False)
-        e2 = pairing_fp.tate(self.setup, QQ, fPP, denominator=False)
+        e1 = pairing.tate(self.setup, fQQ, PP, denominator=False)
+        e2 = pairing.tate(self.setup, QQ, fPP, denominator=False)
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
 
 
@@ -143,9 +143,7 @@ class VDF_GFp2(VerifiableDelayFunction):
         QQ =  Q.get_coordinates(EE1)
 
         # we can use the same computation as for the fp vdf verification
-        # instead of:
-        # e1 = pairing.tate(PP, fQQ, E0, denominator=True)
-        e1 = pairing_fp.tate(self.setup, fQQ, PP, denominator=False)
-        e2 = pairing.tate(fPP, QQ, E1, denominator=True)**2
+        e1 = pairing.tate(self.setup, fQQ, PP, denominator=False)
+        e2 = pairing.tate(self.setup, fPP, QQ, denominator=True)**2
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
 
