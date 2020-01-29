@@ -1,7 +1,7 @@
 #!/usr/bin/env sage
 # -*- coding: utf-8 -*-
 
-import setup, curve, point, vdf, pairing, pairing_fp
+import setup, curve, point, vdf, pairing
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 from sage.misc.misc import cputime
 
@@ -27,14 +27,15 @@ def bench_sqrt(curve, reps=10):
     print_bench(t1, t2, reps)
     return [t1,t2]
 
-def bench_tate(E, reps=10):
+def bench_tate(setup, reps=10):
     '''
     Compare our tate pairing with the tate_pairing function from sage.
     '''
+    E = setup.E0
     E_Fp2 = E.to_gfp2()
     EE = EllipticCurve(E_Fp2.field, [0,E_Fp2.A,0,1,0])
     p = E_Fp2.field.characteristic()
-    P =  E.point_of_order(N=True, n=0, twist=False, deterministic=False)
+    P = E.point_of_order(N=True, n=0, twist=False, deterministic=False)
     PP = P.get_coordinates(EE)
     Q = E_Fp2.point_of_order(N=True, n=0, twist=False, deterministic=False)
     while Q.x/Q.z in E.field:
@@ -46,7 +47,7 @@ def bench_tate(E, reps=10):
     t1 = cputime(t1)
     t2 = cputime()
     for i in range(reps):
-        pairing.tate(PP, QQ, E)
+        pairing.tate(setup, PP, QQ)
     t2 = cputime(t2)
     print_bench(t1, t2, reps)
     return [t1,t2]
@@ -70,7 +71,7 @@ def bench_tate_no_denominator(setup, reps=10):
     t1 = cputime(t1)
     t2 = cputime()
     for i in range(reps):
-        pairing_fp.tate(setup, PP, QQ, denominator=False)
+        pairing.tate(setup, PP, QQ, denominator=False)
     t2 = cputime(t2)
     print_bench(t1, t2, reps)
     return [t1,t2]
@@ -97,7 +98,7 @@ if __name__ == '__main__':
         print('Benching square root function')
         bench_sqrt(s.E0)
         print('Benching tate pairing')
-        bench_tate(E1)
+        bench_tate(s)
         print('Benching tate pairing without denominator')
         bench_tate_no_denominator(s)
         print('Benching pairing final exponentiation')
