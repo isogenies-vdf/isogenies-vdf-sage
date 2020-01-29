@@ -1,7 +1,7 @@
 #!/usr/bin/env sage
 # -*- coding: utf-8 -*-
 
-import setup, curve, point, vdf, pairing
+import setup, curve, point, vdf, pairing, pairing_fp
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 
 def test_isog(E):
@@ -37,6 +37,29 @@ def test_eval_line(E, reps=10):
         assert line2[0] == 0
         assert Sum2.curve()(Sum2) == 2*PP.curve()(PP)
         i+=1
+
+def test_double_line_J_montgomery(E, reps=10):
+    EE = E.weierstrass()
+    for i in range(reps):
+        S = EE.random_point()
+        P = EE.random_point()
+        u = E.field.random_element()
+        S_j = (S[0]*u**2, S[1]*u**3, u)
+        [l, dblS] = pairing_fp.double_line_J_montgomery(S_j, P, EE.a2())
+        assert 2*S == EE.point([dblS[0]/dblS[2]**2, dblS[1]/dblS[2]**3])
+        assert S._line_(S, P) == l[0]/l[1]
+
+def test_add_line_J_montgomery(E, reps=10):
+    EE = E.weierstrass()
+    for i in range(reps):
+        S = EE.random_point()
+        P = EE.random_point()
+        Q = EE.random_point()
+        u = E.field.random_element()
+        S_j = (S[0]*u**2, S[1]*u**3, u)
+        [l, SplusP] = pairing_fp.double_line_J_montgomery(S_j, P, Q, EE.a2())
+        assert S+P == EE.point([SplusP[0]/SplusP[2]**2, SplusP[1]/SplusP[2]**3])
+        assert S._line_(P, Q) == l[0]/l[1]
 
 def test_miller(E, reps=10):
     E_Fp2 = E.to_gfp2()
@@ -117,6 +140,12 @@ if __name__ == '__main__':
         print('Testing line evaluation')
         test_eval_line(s.E0)
         test_eval_line(E1)
+        print('Testing double line evaluation in jacobian coordinates')
+        test_double_line_J_montgomery(s.E0)
+        test_double_line_J_montgomery(E1)
+        print('Testing add line evaluation in jacobian coordinates')
+        test_double_line_J_montgomery(s.E0)
+        test_double_line_J_montgomery(E1)
         print('Testing miller loop')
         test_miller(s.E0)
         test_miller(E1)
@@ -128,3 +157,4 @@ if __name__ == '__main__':
         print('Testing efficient square root')
         test_sqrt(s.E0)
         test_sqrt(E1)
+
