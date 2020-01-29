@@ -52,6 +52,14 @@ def add_line_J_montgomery(S, P, Q, a2):
     
     return [[l_num, Z3], [X3, Y3, Z3]]
 
+def vertical_line_J_montgomery(S, Q):
+    '''
+    S is in jacobian coordinates, Q in affine coordinates
+    return the vertical line between S and -S evaluated in Q.
+    '''
+    t1 = S[2]**2
+    return [t1*Q[0] - S[0], t1]
+
 def miller(P, Q, n, a2, denominator=True) :
     # return the miller loop f_{P, n}(Q)
     if Q.is_zero():
@@ -75,17 +83,19 @@ def miller(P, Q, n, a2, denominator=True) :
         [[ell_num, ell_den], S] = double_line_J_montgomery(V, Q, a2)
         t_num = ell_num * t_num**2
         if denominator :
-            t_den = ell_den * t_den**2
+            [v_num, v_den] = vertical_line_J_montgomery(S, Q)
+            t_num = v_den * t_num
+            t_den = v_num * ell_den * t_den**2
         V = S
         if nbin[i] == 1:
             [[ell_num, ell_den], S] = add_line_J_montgomery(V, P, Q, a2)
             t_num = t_num*ell_num
             if denominator :
-                t_den = t_den*ell_den
+                [v_num, v_den] = vertical_line_J_montgomery(S, Q)
+                t_num = v_den * t_num
+                t_den = v_num * t_den * ell_den
             V = S
         i -= 1
-    if not(denominator) :
-        t_den = 1
 
     if n_is_negative :
         t_num, t_den = t_den, t_num
@@ -111,6 +121,7 @@ def exponentiation(setup, x) :
 
 def tate(setup, P, Q, denominator=False) :
     #if the curve is defined over Fp, we do not compute the denominators
+    # TODO it does not work in the Fp2 general case (denominator=True)
     a2 = P.curve().a2()
     m1, L = miller(P, Q, setup.N, a2, denominator)
     m2 = m1[0]/m1[1]
