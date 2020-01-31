@@ -170,7 +170,7 @@ class Curve:
                 t = t**2
             return t**(self.setup.f * self.setup.N)
 
-    def _sqrt(self, u):
+    def _sqrt(self, u, principal=True):
         '''
         Compute the square root of u if it is in Fp2.
         '''
