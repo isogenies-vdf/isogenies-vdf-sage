@@ -6,8 +6,25 @@ from sage.schemes.elliptic_curves.constructor import EllipticCurve
 from sage.misc.misc import cputime
 
 def print_bench(t1, t2, reps):
-    print('Sage version:\t%.5f ms\t(%s reps)' % (t1*10**3, reps))
-    print('Our version:\t%.5f ms\t(%s reps)' % (t2*10**3, reps))
+    '''
+    t1 is the time for the sage computation in reps repetitions
+    t2 is the time for the our computation in reps repetitions
+    '''
+    T1 = (t1/reps)
+    T2 = (t2/reps)
+    T, _ = divmod(max(T1,T2), 1)
+    unit = "s"
+    if T < 1 :
+        T1 *= 10**3
+        T2 *= 10**3
+        unit = "ms"
+        T, _ = divmod(max(T1,T2), 1)
+        if T < 1 :
+            T1 *= 10**3
+            T2 *= 10**3
+            unit = "μs"
+    print('Sage version:\t%.3f %s\t(%s reps)' % (T1, unit, reps))
+    print('Our version:\t%.3f %s\t(%s reps)' % (T2, unit, reps))
 
 def bench_sqrt(curve, reps=10):
     '''
