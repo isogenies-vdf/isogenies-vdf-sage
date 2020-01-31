@@ -18,7 +18,11 @@ class VerifiableDelayFunction():
         self.P = self.setup.E0.point_of_order(N=True, n=0, twist=True, deterministic=True)
         self.E1, self.fP, self.walk_data = self._setup_walk()
         self.E0_fp2 = self.setup.E0.to_gfp2()
+        self.E0_fp2_ws = self.E0_fp2.weierstrass()
+        self.P_ws = self.P.get_coordinates(self.E0_fp2_ws)
         self.E1_fp2 = self.E1.to_gfp2()
+        self.E1_fp2_ws = self.E1_fp2.weierstrass()
+        self.fP_ws = self.fP.get_coordinates(self.E1_fp2_ws)
 
     def __repr__(self):
         return 'Verifiable delay function with delay %d' % self.delay
@@ -74,14 +78,14 @@ class VDF_GFp(VerifiableDelayFunction):
         if not fQ in self.setup.E0 or fQ.is_zero() or not (self.setup.N*fQ).is_zero():
             return False
 
-        EE0 = self.E0_fp2.weierstrass()
-        PP =   self.P.get_coordinates(EE0)
+        EE0 = self.E0_fp2_ws
+        PP =   self.P_ws
         fQQ =  fQ.get_coordinates(EE0)
-
-        EE1 = self.E1_fp2.weierstrass()
-        fPP =  self.fP.get_coordinates(EE1)
+        
+        EE1 = self.E1_fp2_ws
+        fPP =  self.fP_ws
         QQ =  Q.get_coordinates(EE1)
-
+        
         e1 = pairing.tate(self.setup, fQQ, PP, denominator=False)
         e2 = pairing.tate(self.setup, QQ, fPP, denominator=False)
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
@@ -133,13 +137,12 @@ class VDF_GFp2(VerifiableDelayFunction):
         if not(fQ in self.setup.E0.to_gfp2()) or fQ.is_zero() or not (self.setup.N*fQ).is_zero():
             return False
 
-        EE0 = self.E0_fp2.weierstrass()
-        PP =   self.P.get_coordinates(EE0)
+        EE0 = self.E0_fp2_ws
+        PP =   self.P_ws
         fQQ =  fQ.get_coordinates(EE0)
 
-        E1 = self.E1_fp2
-        EE1 = E1.weierstrass()
-        fPP =  self.fP.get_coordinates(EE1)
+        EE1 = self.E1_fp2_ws
+        fPP =  self.fP_ws
         QQ =  Q.get_coordinates(EE1)
 
         # on the special initial curve we could set denominator=False
