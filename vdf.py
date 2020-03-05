@@ -61,6 +61,7 @@ class VDF_GFp(VerifiableDelayFunction):
         for i in range(self.delay):
             E, (fP,) = ek[-1].isogeny_forward((fP,))
             ek.append(E)
+            print(E)
         E = ek.pop()
         ek.reverse()
 
@@ -119,8 +120,9 @@ class VDF_GFp2(VerifiableDelayFunction):
         fP = self.P
         ek = [E]
         for i in range(self.delay):
-            E, (fP,) = ek[-1].isogeny_forward((fP,))
+            E, (fP,) = ek[-1].isogeny_forward((fP,), principal=False)
             ek.append(E)
+            print(E)
         E = ek.pop()
         ek.reverse()
 
