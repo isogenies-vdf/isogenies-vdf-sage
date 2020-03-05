@@ -179,9 +179,9 @@ class Curve:
         if u.polynomial().degree() == 0: # u in Fp
             t = self._sqrt_expo(u)
             if t**2 == u:
-                return t
+                r = t
             else:
-                return self.to_gfp2().field.gen() * t
+                r = self.to_gfp2().field.gen() * t
         else:
             if not(u.is_square()):
                 raise ValueError("No square root defined over Fp2")
@@ -189,15 +189,18 @@ class Curve:
             [a,b] = u.polynomial().list()
             n = self._sqrt_expo(a**2+b**2)
             z = (a + n)/2
-            #print((a**2+b**2).is_square())
             if not(z.is_square()) :
                 z = (a - n)/2
             alpha = self._sqrt_expo(z)
             beta = b/(2*alpha)
             if alpha**2 == z:
-                return choice((1,-1)) * u.parent()([alpha,beta])
+                r = u.parent()([alpha,beta])
             else:
-                return choice((1,-1)) * u.parent()([beta,-alpha])
+                r = u.parent()([beta,-alpha])
+        if principal :
+            return r
+        else :
+            return choice((1,-1)) * r
 
     def isogeny_forward(self, points, principal=True):
         '''
@@ -225,7 +228,7 @@ class Curve:
         - The image curve
         - A (possibly empty) tuple of evaluated points.
         '''
-        rt = self._sqrt(self.alpha**2 - 1)
+        rt = self._sqrt(self.alpha**2 - 1, principal)
         alpha = 2 * self.alpha * ( self.alpha + rt ) - 1
         evals = tuple(point.Point(P.x*(P.x * self.alpha - P.z), P.z*(P.x - self.alpha * P.z), self)
                      for P in points)
