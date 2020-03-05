@@ -19,7 +19,7 @@ def double_line_jac(S, P, a2):
     t2 = 4*X1*t1        # 4 X1 Y1²
     t3 = 8*t1**2        # 8 Y1^4
     t4 = Z1**2          # Z1²
-    t5 = 3*X1**2 + 2*a2*X1*t4 + t4**2 #numerator after projectivation
+    t5 = 3*X1**2 + t4 * (2*a2*X1 + t4) #numerator after projectivation
     Z3 = 2*Y1*Z1
     X3 = t5**2 - 2*t2 - a2*Z3**2
     Y3 = t5*(t2 - X3) - t3
