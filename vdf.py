@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import curve, point, pairing
+import curve, point, tate
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 import logging
 
@@ -86,9 +86,10 @@ class VDF_GFp(VerifiableDelayFunction):
         EE1 = self.E1_fp2_ws
         fPP =  self.fP_ws
         QQ =  Q.get_coordinates(EE1)
-        
-        e1 = pairing.tate(self.setup, fQQ, PP, denominator=False)
-        e2 = pairing.tate(self.setup, QQ, fPP, denominator=False)
+
+        pp = tate.Tate(0)        
+        e1 = pp.tate(fQQ, PP, self.setup, denominator=False)
+        e2 = pp.tate(QQ, fPP, self.setup, denominator=False)
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
 
 
@@ -139,16 +140,19 @@ class VDF_GFp2(VerifiableDelayFunction):
         if not(fQ in self.setup.E0.to_gfp2()) or fQ.is_zero() or not (self.setup.N*fQ).is_zero():
             return False
 
+        pp = tate.Tate(0)
         EE0 = self.E0_fp2_ws
         PP =   self.P_ws
         fQQ =  fQ.get_coordinates(EE0)
-
+        e1 = pp.tate(fQQ, PP, self.setup, denominator=True)
+        # it should be fQQ.tate_pairing(PP, self.setup.N, 2)
+        e1bis = pp.tate(2*fQQ, PP, self.setup, denominator=True)
+        
         EE1 = self.E1_fp2_ws
         fPP =  self.fP_ws
         QQ =  Q.get_coordinates(EE1)
+        e2 = pp.tate(fPP, QQ, self.setup, denominator=True)**2
 
         # on the special initial curve we could set denominator=False
-        e1 = pairing.tate(self.setup, fQQ, PP, denominator=True)
-        e2 = pairing.tate(self.setup, fPP, QQ, denominator=True)**2
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
 
