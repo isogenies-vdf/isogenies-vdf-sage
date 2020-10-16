@@ -210,16 +210,20 @@ class Point:
 
     #### Conversion to Weierstrass
     
-    def weierstrass(self, curve):
+    def weierstrass(self, curve, twist=False):
         '''
         INPUT:
 
         OUTPUT:
         * the point on the weierstrass curve corresponding to the montgomery curve defined with a
         '''
+        E = curve.weierstrass()
         if self.is_zero() :
-            return curve.weierstrass()(0)
-        return curve.weierstrass().lift_x(self.x/self.z)
+            return E(0)
+        if twist :
+            return E.lift_x(-self.x/self.z)
+        else :
+            return E.lift_x(self.x/self.z)
         # xn = self.x / self.z
         # x_w = xn + self.curve.A / 3
         # return self.curve.weierstrass().lift_x(x_w, extend=True)
