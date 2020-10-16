@@ -1,27 +1,53 @@
-#!/usr/bin/env sage
-# -*- coding: utf-8 -*-
+import unittest
+import sys
+sys.path.insert(0, "isogenies-vdf")
+from setup import TrustedSetup
+import tate, point
 
-import setup, curve, point, vdf, pairing
-from sage.schemes.elliptic_curves.constructor import EllipticCurve
+class TestTate(unittest.TestCase):
 
-def test_isog(E):
+    def test_double_line_jac(self):
+        #stuff with double_line_jac(self, S, P, a2)
+        s = TrustedSetup(f=1, n=8, N=53, alpha=5052)
+        E = s.E0.weierstrass()
+        for i in range(10) :
+            S = E.random_point()
+            P = E.random_point()
+            a2 = E.a2()
+            pp = tate.Tate(0)
+            mil, doublePoint = pp.double_line_jac(S, P, a2)
+            if doublePoint[2] == 0 :
+                self.assertEqual((2*S)[2], 0)
+            else :
+                #normalization of the point
+                doublePoint = (doublePoint[0]/doublePoint[2]**2, doublePoint[1]/doublePoint[2]**3)
+                self.assertEqual(doublePoint[0], (2*S)[0])
+                self.assertEqual(doublePoint[1], (2*S)[1])
+            
+        #,TrustedSetup(f=1, n=64, N=27212093, alpha=213532735709189898821123859)] :
+        
+    def test_add_line_jac(self):
+        # stuff with add_line_jac(self, S, P, Q, a2)
+        assert True
+        
+    def test_vertical_line_jac(self):
+        # stuff with vertical_line_jac(self, S, Q)
+        assert True
+        
+    def test_miller(self) :
+        # stuff with miller(self, S, Q, n, a2, denominator=True)
+        assert True
+        
+    def test_tate(self) :
+        # stuff with tate(self, P, Q, setup, denominator=True)
+        assert True
+
+
+if __name__ == '__main__':
+    unittest.main()
+
     '''
-    Test that composing isogenies forth and back equals mul by 4.
-    '''
-    Ps = [E.elligator(2), E.elligator(10), E.elligator(111)]
-    E1, Qs = E.isogeny_forward(Ps)
-    for A, B in zip(E.isogeny_backward(*Qs), Ps):
-        assert A == 2*B, 'Curve %r, %r != %r' % (E, A.normalize(), B.normalize())
-    return E1
-
-def test_vdf(setup, delay, vdfclass=vdf.VDF_GFp, reps=10):
-    vdf = vdfclass(setup, delay)
-    for i in range(reps):
-        Q = vdf.random_input()
-        fQ = vdf.evaluate(Q)
-        assert vdf.verify(Q, fQ)
-
-def test_double_line_jac(E, reps=10):
+    cuttttt   E, reps=10):
     EE = E.weierstrass()
     for i in range(reps):
         S = EE.random_point()
@@ -119,31 +145,4 @@ def test_tate(E, reps=10):
             ePQ = pairing.tate(E.setup, PP, QQ, denominator=False)
             assert ePQ == PP.tate_pairing(QQ, E.setup.N, k=2)
             i+=1
-
-if __name__ == '__main__':
-    for key, s in setup.SETUPS.items():
-        print('\n==== %s ====' % key)
-        print('Testing isogeny formula')
-        E1 = test_isog(s.E0)
-        test_isog(E1)
-        print('Testing GF(p) VDF')
-        test_vdf(s, 10)
-        print('Testing GF(p²) VDF')
-        test_vdf(s, 10, vdf.VDF_GFp2)
-        print('Testing double line evaluation')
-        test_double_line_jac(s.E0)
-        test_double_line_jac(E1)
-        print('Testing add line evaluation')
-        test_double_line_jac(s.E0)
-        test_double_line_jac(E1)
-        print('Testing miller loop')
-        test_miller(s.E0)
-        test_miller(E1)
-        print('Testing fast exponentiation')
-        test_exponentiation(s)
-        print('Testing Tate pairing')
-        test_tate(s.E0)
-        test_tate(E1)
-        print('Testing efficient square root')
-        test_sqrt(s.E0)
-        test_sqrt(E1)
+    '''
