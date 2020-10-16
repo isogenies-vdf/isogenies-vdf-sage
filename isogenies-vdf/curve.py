@@ -2,6 +2,7 @@
 import point
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 from random import choice
+from collections import deque
 
 class Curve:
     '''
@@ -229,11 +230,51 @@ class Curve:
         - The image curve
         - A (possibly empty) tuple of evaluated points.
         '''
-        rt = self._sqrt(self.alpha**2 - 1, principal)
+        rt = self._sqrt(self.alpha**2 - 1, principal=principal)
         alpha = 2 * self.alpha * ( self.alpha + rt ) - 1
-        evals = tuple(point.Point(P.x*(P.x * self.alpha - P.z), P.z*(P.x - self.alpha * P.z), self)
-                     for P in points)
+        evals = tuple(point.Point(P.x*(P.x * alpha - P.z), P.z*(P.x - alpha * P.z), self)
+                      for P in points)
         return Curve(alpha, self.setup), evals
+
+    ###def large_isogeny_forward(self, kernel, points, strategy, steps, stop=0, principal=True):
+    ###    '''
+    ###    INPUT:
+    ###    * self the point defining the kernel of the isogeny, of degree 4**k
+    ###    * points a list of points that we want to evaluate
+    ###    * strategy a string defining the strategy to adopt: it could be hardcoded. k = len(strategy)
+    ###    * stop an integer if we want to stop before the k-th 4-isogeny.
+    ###    OUTPUT:
+    ###    * images the list of the images of the points of `points`
+    ###    REMARKS:
+    ###    * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
+    ###    '''
+    ###    k = len(strategy)
+    ###    l = k
+    ###    i = 0
+    ###    E = self
+    ###    images = points
+    ###    queue1 = deque()
+    ###    queue1.append([k, kernel])
+    ###    while len(queue1) != 0 and l > stop :
+    ###        [h, P] = queue1.pop()
+    ###        if h == 1 :
+    ###            queue2 = deque()
+    ###            while len(queue1) != 0 :
+    ###                [h, Q] = queue1.popleft()
+    ###                Enew, (fQ,) = E.isogeny_forward((Q,), principal=principal, alpha=P.x/P.z)
+    ###                queue2.append([h-1, fQ])
+    ###            queue1 = queue2
+    ###            Enew, images = E.isogeny_forward(images, principal=principal, alpha=P.x/P.z)
+    ###            l -=  1
+    ###            E = Enew
+    ###        elif strategy[i] > 0 and strategy[i] < h :
+    ###            queue1.append([h, P])
+    ###            P = 2**(strategy[i]) * P
+    ###            queue1.append([h-strategy[i], P])
+    ###            i += 1
+    ###        else :
+    ###            raise RuntimeError('There is a problem in the isogeny computation.')
+    ###    return E, images
 
     def isogeny_backward(self, *points):
         '''
