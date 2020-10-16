@@ -1,9 +1,11 @@
 #!/usr/bin/env sage
 # -*- coding: utf-8 -*-
 
+import sys
+sys.path.insert(0, "isogenies-vdf")
 import verifiabledelayfunction
 from setup import SETUPS, setup_list
-import argparse, sys, logging
+import argparse, logging
 from sage.misc.misc import cputime
 
 parser = argparse.ArgumentParser()
