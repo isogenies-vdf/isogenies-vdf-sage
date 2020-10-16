@@ -33,7 +33,6 @@ class VerifiableDelayFunction():
         'Sample a random input point for the VDF'
         return self.E1.point_of_order(N=True, n=0, twist=False, deterministic=False)
 
-
 class VDF_GFp(VerifiableDelayFunction):
     '''
     VDF instance over GF(p)

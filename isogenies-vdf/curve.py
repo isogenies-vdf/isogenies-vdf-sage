@@ -47,6 +47,7 @@ class Curve:
         'Extend scalars to GF(p²)'
         return Curve(self.setup.GFp2(self.alpha), self.setup)
     
+
     def __contains__(self, P, twist=False) :
         '''
         Test whether a point `P` is on this curve.
