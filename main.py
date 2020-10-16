@@ -1,9 +1,14 @@
 #!/usr/bin/env sage
 # -*- coding: utf-8 -*-
 
-import vdf
+import sys
+sys.path.insert(0, "isogeniesvdf/verifiabledelayfunction")
+sys.path.insert(0, "isogeniesvdf/curve")
+sys.path.insert(0, "isogeniesvdf/point")
+sys.path.insert(0, "isogeniesvdf/tate")
+import verifiabledelayfunction
 from setup import SETUPS, setup_list
-import argparse, sys, logging
+import argparse, logging
 from sage.misc.misc import cputime
 
 parser = argparse.ArgumentParser()
@@ -49,7 +54,7 @@ else:
     logging.info('Method: %s', method)
     logging.info('Number of steps: %s\n', str(Delta))
 
-    vdfclass = vdf.VDF_GFp if protocol == 'fp' else vdf.VDF_GFp2
+    vdfclass = verifiabledelayfunction.VDF_GFp if protocol == 'fp' else verifiabledelayfunction.VDF_GFp2
 
     logging.info('Setting up VDF')
     time = cputime()
