@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sage.all
+from sage.rings.integer_ring import Z as ZZ
 
 class Tate:
     def __init__(self, x):
@@ -16,11 +17,11 @@ class Tate:
         if P[2] == 0:
             raise ValueError("P point must be nonzero.")
         if S[2] == 0:
-            return [[P.curve().base_field().one(), 1], S]
+            return [[P.curve().base_field().one(), P.curve().base_field().one()], S]
         if S[1] == 0:
             # this is a vertical line
             t1 = S[2]**2
-            return [[P[0]*t1 - S[0], t1], (0,1,0)]
+            return [[P[0]*t1 - S[0], t1], (0,P.curve().base_field().one(),0)]
         # doubling formulas
         t1 = S[1]**2          # yS²
         t2 = 4*S[0]*t1        # 4 xS yS²
@@ -39,7 +40,7 @@ class Tate:
             raise ValueError("Q must be nonzero.")
         if P[2] == 0 or S[2] == 0:
             if P[2] == 0 and S[2] == 0:
-                return [[1, 1], (P[0],P[1],1)]
+                return [[P.curve().base_field().one(), P.curve().base_field().one()], (P[0],P[1],1)]
             if P[2] == 0:
                 t1 = S[2]**2
                 return [[Q[0]*t1 - S[0], t1], S]
@@ -53,7 +54,7 @@ class Tate:
                 return self.double_line_jac(P, Q, a2)
             else :
                 # vertical line
-                return [[Q[0] - P[0], 1], (0,1,0)]
+                return [[Q[0] - P[0], P.curve().base_field().one()], (0,P.curve().base_field().one(),0)]
         # addition formulas
         t1 = S[2]**2      # zS²
         t2 = S[2]*t1      # zS³
@@ -78,7 +79,7 @@ class Tate:
         return the vertical line between S and -S evaluated in Q.
         '''
         if S[2] == 0 :
-            return [Q.curve().base_field().one(),1]
+            return [Q.curve().base_field().one(),Q.curve().base_field().one()]
         t1 = S[2]**2
         return [t1*Q[0] - S[0], t1]
 
@@ -89,10 +90,11 @@ class Tate:
         if n.is_zero():
             raise ValueError("n must be nonzero.")
         n_is_negative = False
+        n = ZZ(n)
         if n < 0:
             n = n.abs()
             n_is_negative = True
-        t_num, t_den = 1, 1
+        t_num, t_den = Q.curve().base_field().one(), Q.curve().base_field().one()
         assert S[2] == 1
         V = (S[0], S[1], 1)
         assert Q[2] == 1
@@ -123,7 +125,7 @@ class Tate:
     def tate(self, P, Q, setup, denominator=True):
         a2 = P.curve().a2()
         m1, L = self.miller(P, Q, setup.N, a2, denominator)
-        m2 = m1[0]/m1[1]
+        m2 = setup.GFp2(m1[0]/m1[1])
         # efficient final exponentiation
         x1 = (m2**setup.f)
         for i in range(setup.n+1) :
