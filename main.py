@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, "isogeniesvdf/verifiabledelayfunction")
-sys.path.insert(0, "isogeniesvdf/curve")
-sys.path.insert(0, "isogeniesvdf/point")
-sys.path.insert(0, "isogeniesvdf/tate")
+sys.path.insert(0, "isogenies-vdf/verifiabledelayfunction")
+sys.path.insert(0, "isogenies-vdf/curve")
+sys.path.insert(0, "isogenies-vdf/point")
+sys.path.insert(0, "isogenies-vdf/tate")
 import verifiabledelayfunction
 from setup import SETUPS, setup_list
 import argparse, logging
