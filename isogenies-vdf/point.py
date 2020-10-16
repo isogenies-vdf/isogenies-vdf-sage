@@ -217,7 +217,7 @@ class Point:
         OUTPUT:
         * the point on the weierstrass curve corresponding to the montgomery curve defined with a
         '''
-        E = curve.weierstrass()
+        E = curve.to_gfp2().weierstrass()
         if self.is_zero() :
             return E(0)
         if twist :
