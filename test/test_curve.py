@@ -60,8 +60,7 @@ class TestCurve(unittest.TestCase):
     def test_isogeny_forward(self):
         return True
     
-    def test_large_isogeny_forward(self):
-        # stuff with isogeny_forward(self, points, principal=True)
+    def test_large_isogeny(self):
         s = setup.SETUPS['p14-toy']
         c = curve.Curve(s.alpha, s).to_gfp2()
         P = c.point_of_order(N=False, n=2, deterministic=False)
@@ -75,6 +74,14 @@ class TestCurve(unittest.TestCase):
         # P2 is a point of order 2
         assert (2*P2).is_zero()
         assert not(P2.is_zero())
+        c1, l = c.isogeny((P,), P2.x/P2.z)
+        print(c1.j)
+        print(l[0].weierstrass(c1).order())
+        c2, l = c1.isogeny((),l[0].x/l[0].z)
+        print(c2.j)
+        c3, l = c.large_isogeny(P, (), [1])
+        print(c3.j)
+        '''
         j1 = c.weierstrass().isogeny_codomain(P.weierstrass(c)).j_invariant()
 
         c2, l = c.isogeny_forward((), principal=False)
@@ -83,6 +90,7 @@ class TestCurve(unittest.TestCase):
             c2, l = c.isogeny_forward((), principal=True)
             c2, l = c2.isogeny_forward((), principal=True)
             print(c2.weierstrass().j_invariant(), j1)
+        '''
         print('ok')
         #NOT WORKING
         '''

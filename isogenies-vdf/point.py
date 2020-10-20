@@ -146,59 +146,6 @@ class Point:
 
             return Point(num/den - image.A - 2*x.polynomial()[0], 1, image)
     
-    def get_P4(self, k) :
-        '''
-        INPUT:
-        * self is a point of order 4**k of the curve
-        * k an integer
-        OUTPUT:
-        * R = [4**(k-1)]P4powk  that is a point of order 4 of the curve
-        '''
-        R = self
-        R_prec = R
-        while R.z != 0 :
-            R, R_prec = 4*R, R
-        return R_prec
-
-    def isogeny_degree4k(self, listOfPoints, strategy, stop=0) :
-        '''
-        INPUT:
-        * self the point defining the kernel of the isogeny, of degree 4**k
-        * listOfPoints a list of points that we want to evaluate
-        * strategy a string defining the strategy to adopt: it could be hardcoded. k = len(strategy)
-        * stop an integer if we want to stop before the k-th 4-isogeny.
-        OUTPUT:
-        * images the list of the images of the points of listOfPoints
-        REMARKS:
-        * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
-        '''
-        k = len(strategy)
-        l = k
-        i = 0
-        images = listOfPoints
-        queue1 = deque()
-        queue1.append([k, self])
-        while len(queue1) != 0 and l > stop :
-            [h, P] = queue1.pop()
-            if h == 1 :
-                queue2 = deque()
-                while len(queue1) != 0 :
-                    [h, Q] = queue1.popleft()
-                    [Q] = P.isogeny_degree4([Q])
-                    queue2.append([h-1, Q])
-                queue1 = queue2
-                images = P.isogeny_degree4(images)
-                l -=  1
-            elif strategy[i] > 0 and strategy[i] < h :
-                queue1.append([h, P])
-                P = 4**(strategy[i]) * P
-                queue1.append([h-strategy[i], P])
-                i += 1
-            else :
-                raise RuntimeError('There is a problem in the isogeny computation.')
-        return images
-
-
     #### Conversion to XYZ coordinates
     
     def get_coordinates(self, E):
@@ -215,7 +162,7 @@ class Point:
         INPUT:
 
         OUTPUT:
-        * the point on the weierstrass curve corresponding to the montgomery curve defined with a
+        * the point on the short Weierstrass curve corresponding to the montgomery curve
         '''
         E = curve.to_gfp2().weierstrass()
         if self.is_zero() :
