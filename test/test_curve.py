@@ -1,8 +1,7 @@
 import unittest
 import sys
 sys.path.insert(0, "isogenies-vdf")
-import setup
-import curve, point
+import setup, curve, point, strategy
 from sage.rings.integer_ring import Z as ZZ
 from sage.misc.prandom import randint
 from sage.arith.misc import next_prime
@@ -88,12 +87,16 @@ class TestCurve(unittest.TestCase):
             R = point.Point(ll[0].x,ll[0].z, c)
             self.assertEqual(R, 2*Q)
     
-    #def test_large_isogeny_forward(self):
-    #    s = setup.SETUPS['p14-toy']
-    #    c = curve.Curve(s.alpha, s).to_gfp2()
-    #    P = c.point_of_order(N=False, n=3, deterministic=False)
-    #    c2, l = c.large_isogeny_forward(P, (), [1,1])
-    #    self.assertEqual(c2.j, c.weierstrass().isogeny_codomain(P.weierstrass(c)).j_invariant())
+    def test_large_isogeny_forward(self):
+        s = setup.SETUPS['p14-toy']
+        c = curve.Curve(s.alpha, s).to_gfp2()
+        for nn in range(1, c.max_2_torsion+1) :
+            P = c.point_of_order(N=False, n=nn, deterministic=False)
+            while ((2**(nn-1))*P).x == 0 :
+                P = c.point_of_order(N=False, n=nn, deterministic=False)
+            s = strategy.Strategy(0)
+            c2, l = c.large_isogeny_forward(P, (), s.generate(nn-1, 1, 1))
+            self.assertEqual(c2.j, c.weierstrass().isogeny_codomain(P.weierstrass(c)).j_invariant())
 
     #def test_large_isogeny_backward(self):
     #    s = setup.SETUPS['p14-toy']
