@@ -290,9 +290,9 @@ class Curve:
         queue1 = deque()
         queue1.append([k, kernel])
         while len(queue1) != 0 and l > stop :
-            print(i)
+            #print(i)
             [h, P] = queue1.pop()
-            print('h=', h)
+            #print('h=', h)
             if h == 1 :
                 queue2 = deque()
                 E.alpha = P.x/P.z
@@ -310,7 +310,7 @@ class Curve:
                 for j in range(strategy[i]):
                     PP = 2*PP
                 queue1.append([h-strategy[i], PP])
-                print(queue1)
+                #print(queue1)
                 i += 1
             else :
                 raise RuntimeError('There is a problem in the isogeny computation.')
