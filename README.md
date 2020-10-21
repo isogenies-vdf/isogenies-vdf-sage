@@ -10,15 +10,10 @@ where:
 - `NBITERATIONS` is the number of 2-isogenies to compute for the evaluation.
 
 # Test
-`sage tests.py`
+`sage test/test_curve.py`
+`sage test/test_point.py`
+`sage test/test_tate.py`
+`sage test/test_verifiable_delay_function.py`
 
-#Bench
-`sage benchs.py`
-
-# Issues.
-
-- One pairing on the verify step can be done before the answer of vdf_eval.
-- Do I really need all the a-coefficients of the steps in the output of setup ?
-When I compute the evaluation step, I need to switch to the right isomorphic 
-curve and so need the a coefficient.
-Maybe it can be recomputed during eval... (?)
+# Bench
+`sage bench/benchs.py` (not working for the moment)
