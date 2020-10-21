@@ -11,107 +11,93 @@ from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 
 class TestCurve(unittest.TestCase):
 
-    '''
-    def test_j_weierstrass(self):
-        for s in setup.SETUPS.values():
-            c = curve.Curve(s.alpha,s)
-            self.assertEqual(c.j, c.weierstrass().j_invariant())
-        
-    def test_max_2_torsion(self):
-        for s in setup.SETUPS.values():
-            c = curve.Curve(s.alpha, s)
-            n = c.max_2_torsion
-            P = c.point_of_order(N=False, n=n, twist=False, deterministic=False)
-            self.assertTrue(True) # ok if P is found
-
-    def test_elligator(self, reps=10):
-        for s in setup.SETUPS.values():
-            c = curve.Curve(s.alpha, s)
-            F = c.field
-            for i in range(reps) :
-                P = c.elligator(F.random_element(), twist=False)
-                P_ws = P.weierstrass(c,twist=False)
-                self.assertTrue(True) # ok if P_ws is created
-
-    def test_elligator_twist(self, reps=10):
-        for s in setup.SETUPS.values():
-            c = curve.Curve(s.alpha, s)
-            F = c.field
-            self.assertTrue(F.is_prime_field())
-            for i in range(reps) :
-                P = c.elligator(F.random_element(), twist=True)
-                P_ws = P.weierstrass(c,twist=True)
-                self.assertTrue(True) # ok if P_ws is created
+    #def test_j_weierstrass(self):
+    #    for s in setup.SETUPS.values():
+    #        c = curve.Curve(s.alpha,s)
+    #        self.assertEqual(c.j, c.weierstrass().j_invariant())
+    #    
+    #def test_max_2_torsion(self):
+    #    for s in setup.SETUPS.values():
+    #        c = curve.Curve(s.alpha, s)
+    #        n = c.max_2_torsion
+    #        P = c.point_of_order(N=False, n=n, twist=False, deterministic=False)
+    #        self.assertTrue(True) # ok if P is found
+    #
+    #def test_elligator(self, reps=10):
+    #    for s in setup.SETUPS.values():
+    #        c = curve.Curve(s.alpha, s)
+    #        F = c.field
+    #        for i in range(reps) :
+    #            P = c.elligator(F.random_element(), twist=False)
+    #            P_ws = P.weierstrass(c,twist=False)
+    #            self.assertTrue(True) # ok if P_ws is created
+    #
+    #def test_elligator_twist(self, reps=10):
+    #    for s in setup.SETUPS.values():
+    #        c = curve.Curve(s.alpha, s)
+    #        F = c.field
+    #        self.assertTrue(F.is_prime_field())
+    #        for i in range(reps) :
+    #            P = c.elligator(F.random_element(), twist=True)
+    #            P_ws = P.weierstrass(c,twist=True)
+    #            self.assertTrue(True) # ok if P_ws is created
+    #
+    ##def test_point_of_order(self):
+    ##    # stuff with point_of_order(self, N=False, n=None, twist=False, deterministic=True)
+    ##    return True
+    #    
+    ##def test__sqrt_expo(self):
+    ##    # stuff with _sqrt_expo(self, u)
+    ##    return True
+    #
+    ##def test__sqrt(self):
+    ##    # stuff with _sqrt(self, u, principal=True)
+    ##    return True
+    #
+    #def test_isogeny_forward(self):
+    #    s = setup.SETUPS['p14-toy']
+    #    c = curve.Curve(s.alpha, s).to_gfp2()
+    #    P = c.point_of_order(N=False, n=2, deterministic=False)
+    #    # P is a point of order 4
+    #    self.assertTrue((4*P).is_zero() and not((2*P).is_zero()) and not(P.is_zero()))
+    #    P2 = 2*P
+    #    # P2 is a point of order 2
+    #    self.assertTrue((2*P2).is_zero() and not(P2.is_zero()))
+    #    x1 = P2.x/P2.z
+    #    c.alpha = x1
+    #    self.assertTrue(0==x1**3 + c.A*x1**2  +x1)
+    #    c1, l = c.isogeny_forward((P,))
+    #    self.assertEqual(l[0].weierstrass(c1).order(), 2)
+    #    c1.alpha = l[0].x/l[0].z
+    #    c2, l = c1.isogeny_forward(())
+    #    self.assertEqual(c2.j, c.weierstrass().isogeny_codomain(P.weierstrass(c)).j_invariant())
+    #
+    #def test_isogeny_backward(self, reps=10):
+    #    s = setup.SETUPS['p14-toy']
+    #    c = curve.Curve(s.alpha, s).to_gfp2()
+    #    P = c.point_of_order(N=False, n=1, deterministic=False)
+    #    # P is a point of order 2
+    #    self.assertTrue((2*P).is_zero() and not(P.is_zero()))
+    #    for i in range(reps):
+    #        Q = c.point_of_order(N=True,n=c.max_2_torsion,deterministic=False)
+    #        c.alpha = P.x/P.z
+    #        c1, l = c.isogeny_forward((Q,))
+    #        ll = c.isogeny_backward(l[0])
+    #        R = point.Point(ll[0].x,ll[0].z, c)
+    #        self.assertEqual(R, 2*Q)
     
-    def test_point_of_order(self):
-        # stuff with point_of_order(self, N=False, n=None, twist=False, deterministic=True)
-        # todo
-        return True
-        
-    def test__sqrt_expo(self):
-        # stuff with _sqrt_expo(self, u)
-        return True
-    
-    def test__sqrt(self):
-        # stuff with _sqrt(self, u, principal=True)
-        return True
-    '''
-
-    def test_isogeny_forward(self):
-        return True
-    
-    def test_large_isogeny(self):
+    def test_large_isogeny_forward(self):
         s = setup.SETUPS['p14-toy']
         c = curve.Curve(s.alpha, s).to_gfp2()
-        P = c.point_of_order(N=False, n=2, deterministic=False)
-        while ((2*P).x == 0) :
-            P = c.point_of_order(N=False, n=2, deterministic=False)
-        # P is a point of order 4
-        assert (4*P).is_zero()
-        assert not((2*P).is_zero())
-        assert not(P.is_zero())
-        P2 = 2*P
-        # P2 is a point of order 2
-        assert (2*P2).is_zero()
-        assert not(P2.is_zero())
-        c1, l = c.isogeny((P,), P2.x/P2.z)
-        print(c1.j)
-        print(l[0].weierstrass(c1).order())
-        c2, l = c1.isogeny((),l[0].x/l[0].z)
-        print(c2.j)
-        c3, l = c.large_isogeny(P, (), [1])
-        print(c3.j)
-        '''
-        j1 = c.weierstrass().isogeny_codomain(P.weierstrass(c)).j_invariant()
+        P = c.point_of_order(N=False, n=3, deterministic=False)
+        c2, l = c.large_isogeny_forward(P, (), [1,1])
+        self.assertEqual(c2.j, c.weierstrass().isogeny_codomain(P.weierstrass(c)).j_invariant())
 
-        c2, l = c.isogeny_forward((), principal=False)
-        c2, l = c2.isogeny_forward((), principal=False)
-        while(c2.weierstrass().j_invariant() != j1) :
-            c2, l = c.isogeny_forward((), principal=True)
-            c2, l = c2.isogeny_forward((), principal=True)
-            print(c2.weierstrass().j_invariant(), j1)
-        '''
-        print('ok')
-        #NOT WORKING
-        '''
-        E1, l1 = c.large_isogeny_forward(P, (), [1], 2, principal=False)
-        P2 = 2*P
-        print('ker=', P2.x/P2.z)
-        E2, l2 = c.isogeny_forward((P,), principal=False, alpha = P2.x/P2.z)
-        fP = l2[0]
-        print(E2.weierstrass().j_invariant())
-        print('fP=', fP.weierstrass(E2))
-        print('order=', fP.weierstrass(E2).order().factor())
-        #E4, l4 = E2.isogeny_forward((), principal=False, alpha=fP.x/fP.z)
-        #this is not working
-        #print(E1.j)
-        #print(E4.j)
-        '''
-        return True
-        
-    def test_isogeny_backward(self):
-        # stuff wit isogeny_backward(self, *points)
-        return True
-        
+    #def test_large_isogeny_backward(self):
+    #    s = setup.SETUPS['p14-toy']
+    #    c = curve.Curve(s.alpha, s).to_gfp2()
+    #    P = c.point_of_order(N=False, n=3, deterministic=False)
+    #    c2, l = c.large_isogeny_forward(P, (), [1,1])        
+    
 if __name__ == '__main__':
     unittest.main()

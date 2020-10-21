@@ -26,9 +26,9 @@ class TestPoint(unittest.TestCase):
                 DoubleP = 2*P
                 self.assertTrue((2*P_ws)[0]/(2*P_ws)[2] == DoubleP.x/DoubleP.z)
                     
-    def test_add(self) :
-        # ?
-        return True
+    #def test_add(self) :
+    #    # ?
+    #    return True
 
     def test_mul(self, reps=5):
         for s in setup.SETUPS.values():
@@ -53,9 +53,9 @@ class TestPoint(unittest.TestCase):
                 tP_ws = P_ws + piP_ws
                 self.assertEqual(tP.x/tP.z, tP_ws[0]/tP_ws[2])
                     
-    def test_weierstrass(self):
-        #?
-        return True
+    #def test_weierstrass(self):
+    #    #?
+    #    return True
     
 if __name__ == '__main__':
     unittest.main()

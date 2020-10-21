@@ -232,7 +232,7 @@ class Curve:
         '''
         rt = self._sqrt(self.alpha**2 - 1, principal=principal)
         alpha = 2 * self.alpha * ( self.alpha + rt ) - 1
-        evals = tuple(point.Point(P.x*(P.x * alpha - P.z), P.z*(P.x - alpha * P.z), self)
+        evals = tuple(point.Point(P.x*(P.x * self.alpha - P.z), P.z*(P.x - self.alpha * P.z), self)
                       for P in points)
         return Curve(alpha, self.setup), evals
 
@@ -256,26 +256,7 @@ class Curve:
         return tuple(point.Point((P.x + P.z)**2, 4 * self.alpha * P.x * P.z, self)
                          for P in points)
 
-    def isogeny(self, points, alpha):
-        '''
-        Compute the degree 2 isogeny of kernel (alpha, 0)
-        /!\ alpha must be non-zero /!\
-
-        INPUT:
-
-        `points` a (possibly empty) list/tuple of points onto which the isogeny
-        must be evaluated.
-
-        OUTPUT:
-    
-        - The image curve
-        - A (possibly empty) tuple of evaluated points.
-        '''
-        evals = tuple(point.Point(P.x*(P.x * alpha - P.z), P.z*(P.x - alpha * P.z), self)
-                      for P in points)
-        return Curve(alpha, self.setup), evals
-    
-    def large_isogeny(self, kernel, points, strategy, stop=0):
+    def large_isogeny_forward(self, kernel, points, strategy, stop=0):
         '''
         INPUT:
         * self the point defining the kernel of the isogeny, of degree 4**k
@@ -283,7 +264,8 @@ class Curve:
         * strategy a string defining the strategy to adopt: it could be hardcoded. k = len(strategy)
         * stop an integer if we want to stop before the k-th 4-isogeny.
         OUTPUT:
-        * images the list of the images of the points of `points`
+        * the list of the images of the points of `points`
+        * the kernel of the dual isogeny
         REMARKS:
         * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
         '''
@@ -291,29 +273,48 @@ class Curve:
         l = k
         i = 0
         E = self
-        images = points
+        # The dual isogeny has kernel phi(Q) where Q is a point of another subgroup of the 2^(len(strategy)+1) torsion
+        #n = len(strategy)+1
+        #Q = E.point_of_order(N=False, n=n, deterministic=False)
+        #Q2 = Q
+        #P2 = kernel
+        #for j in range(n-1):
+        #    Q2 = 2*Q2
+        #    P2 = 2*P2
+        #while (P2.x * Q2.z == Q2.x * P2.z or P2.x * Q2.z == - Q2.x * P2.z) :
+        #    Q = E.point_of_order(N=False, n=len(strategy)+1, deterministic=False)
+        #    Q2 = Q
+        #    for j in range(n-1):
+        #        Q2 = 2*Q2
+        images = points# + (Q,)
         queue1 = deque()
         queue1.append([k, kernel])
         while len(queue1) != 0 and l > stop :
+            print(i)
             [h, P] = queue1.pop()
+            print('h=', h)
             if h == 1 :
                 queue2 = deque()
+                E.alpha = P.x/P.z
                 while len(queue1) != 0 :
                     [h, Q] = queue1.popleft()
-                    Enew, (fQ,) = E.isogeny((Q,), P.x/P.z)
+                    Enew, (fQ,) = E.isogeny_forward((Q,))
                     queue2.append([h-1, fQ])
                 queue1 = queue2
-                Enew, images = E.isogeny(images, P.x/P.z)
+                Enew, images = E.isogeny_forward(images)
                 l -=  1
                 E = Enew
             elif strategy[i] > 0 and strategy[i] < h :
                 queue1.append([h, P])
-                P = 2**(strategy[i]) * P
-                queue1.append([h-strategy[i], P])
+                PP = P
+                for j in range(strategy[i]):
+                    PP = 2*PP
+                queue1.append([h-strategy[i], PP])
+                print(queue1)
                 i += 1
             else :
                 raise RuntimeError('There is a problem in the isogeny computation.')
-            return E, images
+        return E, images#[:-1], images[-1]
 
     def weierstrass(self) :
         '''
