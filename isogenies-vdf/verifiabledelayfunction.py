@@ -53,7 +53,23 @@ class VDF_GFp(VerifiableDelayFunction):
         - P is the image of the generator under the isogeny,
         - data is the evaluation key describing the walk.
         '''
+        
+        # to get the kernel of the 2^T isog, do it :
+        # The dual isogeny has kernel phi(Q) where Q is a point of another subgroup of the 2^(len(strategy)+1) torsion
+        #n = len(strategy)+1
+        #Q = E.point_of_order(N=False, n=n, deterministic=False)
+        #Q2 = Q
+        #P2 = kernel
+        #for j in range(n-1):
+        #    Q2 = 2*Q2
+        #    P2 = 2*P2
+        #while (P2.x * Q2.z == Q2.x * P2.z or P2.x * Q2.z == - Q2.x * P2.z) :
+        #    Q = E.point_of_order(N=False, n=len(strategy)+1, deterministic=False)
+        #    Q2 = Q
+        #    for j in range(n-1):
+        #        Q2 = 2*Q2
 
+        
         # start walking
         fP = self.P
         ek = [self.setup.E0]

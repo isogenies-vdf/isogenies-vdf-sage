@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*- 
+from copy import copy
 import point
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 from random import choice
@@ -232,9 +233,10 @@ class Curve:
         '''
         rt = self._sqrt(self.alpha**2 - 1, principal=principal)
         alpha = 2 * self.alpha * ( self.alpha + rt ) - 1
-        evals = tuple(point.Point(P.x*(P.x * self.alpha - P.z), P.z*(P.x - self.alpha * P.z), self)
+        new_curve = Curve(alpha, self.setup)
+        evals = tuple(point.Point(P.x*(P.x * self.alpha - P.z), P.z*(P.x - self.alpha * P.z), new_curve)
                       for P in points)
-        return Curve(alpha, self.setup), evals
+        return new_curve, evals
 
     def isogeny_backward(self, *points):
         '''
@@ -270,31 +272,17 @@ class Curve:
         * self needs to be such that [4**(k-1)] self  has x-coordinate != +/- 1.
         '''
         k = len(strategy)
-        l = k
+        l = k+1
         i = 0
-        E = self
-        # The dual isogeny has kernel phi(Q) where Q is a point of another subgroup of the 2^(len(strategy)+1) torsion
-        #n = len(strategy)+1
-        #Q = E.point_of_order(N=False, n=n, deterministic=False)
-        #Q2 = Q
-        #P2 = kernel
-        #for j in range(n-1):
-        #    Q2 = 2*Q2
-        #    P2 = 2*P2
-        #while (P2.x * Q2.z == Q2.x * P2.z or P2.x * Q2.z == - Q2.x * P2.z) :
-        #    Q = E.point_of_order(N=False, n=len(strategy)+1, deterministic=False)
-        #    Q2 = Q
-        #    for j in range(n-1):
-        #        Q2 = 2*Q2
-        images = points# + (Q,)
+        E = copy(self)
+        images = points
         queue1 = deque()
-        queue1.append([k, kernel])
+        queue1.append([l, kernel])
         while len(queue1) != 0 and l > stop :
-            #print(i)
             [h, P] = queue1.pop()
-            #print('h=', h)
             if h == 1 :
                 queue2 = deque()
+                assert P.weierstrass(E).order() == 2
                 E.alpha = P.x/P.z
                 while len(queue1) != 0 :
                     [h, Q] = queue1.popleft()
@@ -306,15 +294,14 @@ class Curve:
                 E = Enew
             elif strategy[i] > 0 and strategy[i] < h :
                 queue1.append([h, P])
-                PP = P
+                PP = copy(P)
                 for j in range(strategy[i]):
                     PP = 2*PP
                 queue1.append([h-strategy[i], PP])
-                #print(queue1)
                 i += 1
             else :
                 raise RuntimeError('There is a problem in the isogeny computation.')
-        return E, images#[:-1], images[-1]
+        return E, images
 
     def weierstrass(self) :
         '''
