@@ -21,7 +21,7 @@ class TrustedSetup:
         self.n = ZZ(n)
         self.N = ZZ(N)
         self.alpha = self.GFp(alpha)
-
+        
     def __repr__(self):
         return 'Starting %s over finite field of size (2^%d·N·%d - 1), with N a %d-bits integer.' % (self.E0, self.n, self.f, self.N.nbits())
 

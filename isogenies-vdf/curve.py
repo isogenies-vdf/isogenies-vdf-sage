@@ -2,6 +2,7 @@
 from copy import copy
 import point
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
+from sage.rings.finite_rings.finite_field_constructor import FiniteField as GF
 from random import choice
 from collections import deque
 
@@ -20,17 +21,23 @@ class Curve:
     Consequently, α and 1/α are the absissas of two points of order 2.
     '''
     
-    def __init__(self, alpha, setup):
+    def __init__(self, alpha, setup, force_gfp2=False):
         if (alpha + 1)**4 == 4:
             raise ValueError('Curve is singular (alpha=%d)' % alpha)
         if alpha**2 == -1:
             raise ValueError('Trying to build curve with j=1728.\n Either you did something wrong, or you are very unlucky.')
         self.alpha = alpha
-        
-        self.field = alpha.parent()
-        self.is_on_gfp = self.field.is_prime_field()
-        self.non_square = -1 if self.is_on_gfp else setup.non_square_GFp2
         self.setup = setup
+        if not(force_gfp2):
+            if((alpha+1/alpha)**(setup.p-1) == 1) :
+                self.field = GF(setup.p)
+            else:
+                self.field = alpha.parent()
+            self.is_on_gfp = self.field.is_prime_field()
+        else:
+            self.field = self.setup.GFp2
+            self.is_on_gfp = False
+        self.non_square = -1 if self.is_on_gfp else setup.non_square_GFp2
         
     @property
     def A(self):
@@ -46,9 +53,8 @@ class Curve:
     __str__ = __repr__
 
     def to_gfp2(self):
-        'Extend scalars to GF(p²)'
-        return Curve(self.setup.GFp2(self.alpha), self.setup)
-    
+        # Extend scalars to GF(p²)
+        return Curve(self.setup.GFp2(self.alpha), self.setup)    
 
     def __contains__(self, P, twist=False) :
         '''
@@ -173,13 +179,45 @@ class Curve:
                 t = t**2
             return t**(self.setup.f * self.setup.N)
 
-    def _sqrt(self, u, principal=True):
+    def _sqrt(self, u):
         '''
         Compute the square root of u if it is in Fp2.
         '''
+        if self.is_on_gfp:
+            rt = self._sqrt_expo(u)
+            if rt**2 == u:
+                return rt
+            else:
+                return self.setup.GFp2.gen() * rt
+        else:
+            if u == 0 :
+                return 0
+            if not(u.is_square()):
+                raise ValueError("No square root defined over Fp2")
+            # Fp2 = Fp(i) so we can compute the root in two roots over Fp :
+            if (u in self.setup.GFp):
+                rt = self._sqrt_expo(u)
+                if rt**2 == u:
+                    return rt
+                else:
+                    return self.setup.GFp2.gen() * rt
+            [a,b] = u.polynomial().list()
+            n = self._sqrt_expo(a**2+b**2)
+            z = (a + n)/2
+            if not(z.is_square()) :
+                z = (a - n)/2
+            alpha = self._sqrt_expo(z)
+            beta = b/(2*alpha)
+            if alpha**2 == z:
+                r = u.parent()([alpha,beta])
+            else:
+                r = u.parent()([beta,-alpha])
+            return choice((1,-1)) * r
+
+        '''
         if u == 0:
             return 0
-        if u.polynomial().degree() == 0: # u in Fp
+        if principal and u.polynomial().degree() == 0: # u in Fp
             t = self._sqrt_expo(u)
             if t**2 == u:
                 r = t
@@ -204,8 +242,9 @@ class Curve:
             return r
         else :
             return choice((1,-1)) * r
+        '''
         
-    def isogeny_forward(self, points, principal=True):
+    def isogeny_forward(self, points):
         '''
         Compute and evaluate the degree 2 isogeny with kernel alpha.
 
@@ -219,7 +258,7 @@ class Curve:
         must be evaluated.
 
         OPTIONS:
-
+        (REMOVED)
         `principal=True` whether or not the α' coefficient of the image 
         curve is computed by taking the principal square root of (α² - 1).
 
@@ -231,14 +270,15 @@ class Curve:
         - The image curve
         - A (possibly empty) tuple of evaluated points.
         '''
-        rt = self._sqrt(self.alpha**2 - 1, principal=principal)
+        rt = self._sqrt(self.alpha**2 - 1)
         alpha = 2 * self.alpha * ( self.alpha + rt ) - 1
-        new_curve = Curve(alpha, self.setup)
+        new_curve = copy(self)
+        new_curve.alpha = alpha
         evals = tuple(point.Point(P.x*(P.x * self.alpha - P.z), P.z*(P.x - self.alpha * P.z), new_curve)
                       for P in points)
         return new_curve, evals
 
-    def isogeny_backward(self, *points):
+    def isogeny_backward(self, points):
         '''
         Evaluate the dual isogeny to `isogeny_backward`.
 
@@ -258,7 +298,7 @@ class Curve:
         return tuple(point.Point((P.x + P.z)**2, 4 * self.alpha * P.x * P.z, self)
                          for P in points)
 
-    def large_isogeny_forward(self, kernel, points, strategy, stop=0):
+    def large_isogeny_forward(self, points, strategy, stop=0, with_dual=False):
         '''
         INPUT:
         * self the point defining the kernel of the isogeny, of degree 4**k
@@ -275,14 +315,45 @@ class Curve:
         l = k+1
         i = 0
         E = copy(self)
+        # Find `kernel` such that 2**(l-1) * `kernel` has non-zero x-coordinate
+        kernel = E.point_of_order(N=False, n=l, deterministic=False)
+        K2 = kernel
+        for j in range(l-1):
+            K2 = 2*K2
+        while(K2.x == 0) :
+            kernel = E.point_of_order(N=False, n=l, deterministic=False)
+            K2 = kernel
+            for j in range(l-1):
+                K2 = 2*K2
+        self.alpha = K2.x/K2.z
+        # Computes a point Q that will bring the dual kernel
+        if with_dual:
+            # The dual isogeny has kernel phi(Q) where Q is a point of another subgroup of the `l`-torsion
+            if self.is_on_gfp:
+                Q = self.point_of_order(N=False, n=l, twist=True, deterministic=False)
+            else :
+                Q = self.point_of_order(N=False, n=l, deterministic=False)
+            Q2 = Q
+            for j in range(l-1):
+                Q2 = 2*Q2
+            while (K2.x * Q2.z == Q2.x * K2.z or K2.x * Q2.z == - Q2.x * K2.z) :
+                if self.is_on_gfp:
+                    Q = self.point_of_order(N=False, n=l, twist=True, deterministic=False)
+                else :
+                    Q = self.point_of_order(N=False, n=l, deterministic=False)
+                Q2 = Q
+                for j in range(l-1):
+                    Q2 = 2*Q2
         images = points
+        if with_dual:
+            images = (Q,) + images
+            list_of_curves = [self]
         queue1 = deque()
         queue1.append([l, kernel])
         while len(queue1) != 0 and l > stop :
             [h, P] = queue1.pop()
             if h == 1 :
                 queue2 = deque()
-                assert P.weierstrass(E).order() == 2
                 E.alpha = P.x/P.z
                 while len(queue1) != 0 :
                     [h, Q] = queue1.popleft()
@@ -292,6 +363,8 @@ class Curve:
                 Enew, images = E.isogeny_forward(images)
                 l -=  1
                 E = Enew
+                if with_dual:
+                    list_of_curves.append(E)
             elif strategy[i] > 0 and strategy[i] < h :
                 queue1.append([h, P])
                 PP = copy(P)
@@ -301,14 +374,49 @@ class Curve:
                 i += 1
             else :
                 raise RuntimeError('There is a problem in the isogeny computation.')
-        return E, images
+        if with_dual:
+            return E, images, kernel, list_of_curves[:-1]
+        else :
+            return E, images, kernel
 
-    def weierstrass(self) :
+    def large_isogeny_backward(self, kernel, points, strategy, listOfCurves):
+        k = len(strategy)
+        l = k+1
+        i = 0
+        images = points
+        queue1 = deque()
+        queue1.append([l, kernel])
+        while len(queue1) != 0 :
+            [h, P] = queue1.pop()
+            if h == 1 :
+                queue2 = deque()
+                while len(queue1) != 0 :
+                    [h, Q] = queue1.popleft()
+                    (fQ,) = listOfCurves[l-1].isogeny_backward((Q,))
+                    queue2.append([h-1, fQ])
+                queue1 = queue2
+                images = listOfCurves[l-1].isogeny_backward(images)
+                l -=  1
+            elif strategy[i] > 0 and strategy[i] < h :
+                queue1.append([h, P])
+                PP = copy(P)
+                for j in range(strategy[i]):
+                    PP = 2*PP
+                queue1.append([h-strategy[i], PP])
+                i += 1
+            else :
+                raise RuntimeError('There is a problem in the isogeny computation.')
+        return images
+
+   
+    def weierstrass(self, twist=False) :
         '''
         INPUT:
 
         OUTPUT:
         * E the elliptic curve in Weierstrass model (y^2 = x^3+a*x+b)
         '''
+        if twist and self.is_on_gfp:
+            return EllipticCurve([0,-self.A,0,1,0])
         return EllipticCurve([0,self.A,0,1,0])
 #        return EllipticCurve([1-(self.A**2)/3, self.A*(2*(self.A**2)/9-1)/3])

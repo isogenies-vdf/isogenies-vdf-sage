@@ -101,7 +101,10 @@ class TestTate(unittest.TestCase):
             while(P.order() != s.N) :
                 P = ((s.p+1)//s.N) * E_p.random_point()
             P = E_p2(P)
-            Q = s.E0.point_of_order(N=True, n=0, twist=True, deterministic=True).weierstrass(s.E0.to_gfp2(), twist=True)
+            Q = s.E0.point_of_order(N=True, n=0, twist=True, deterministic=False).weierstrass(s.E0, twist=True)
+            ii = E_p2.base_field().gen()
+            QQ = E_p2([-Q[0], ii*Q[1]])
+            Q = QQ
             t = pp.tate(P, Q, s, denominator=False)
             self.assertEqual(t, P.tate_pairing(Q, s.N, 2))
             

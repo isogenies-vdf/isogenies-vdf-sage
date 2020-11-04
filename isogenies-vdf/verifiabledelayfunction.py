@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import curve, point, tate
+from copy import copy
+import curve, point, tate, strategy
 from sage.schemes.elliptic_curves.constructor import EllipticCurve
 import logging
 
@@ -54,38 +55,29 @@ class VDF_GFp(VerifiableDelayFunction):
         - data is the evaluation key describing the walk.
         '''
         
-        # to get the kernel of the 2^T isog, do it :
-        # The dual isogeny has kernel phi(Q) where Q is a point of another subgroup of the 2^(len(strategy)+1) torsion
-        #n = len(strategy)+1
-        #Q = E.point_of_order(N=False, n=n, deterministic=False)
-        #Q2 = Q
-        #P2 = kernel
-        #for j in range(n-1):
-        #    Q2 = 2*Q2
-        #    P2 = 2*P2
-        #while (P2.x * Q2.z == Q2.x * P2.z or P2.x * Q2.z == - Q2.x * P2.z) :
-        #    Q = E.point_of_order(N=False, n=len(strategy)+1, deterministic=False)
-        #    Q2 = Q
-        #    for j in range(n-1):
-        #        Q2 = 2*Q2
-
-        
         # start walking
         fP = self.P
-        ek = [self.setup.E0]
+        ek = [[self.setup.E0, None, None]]
+        E = copy(self.setup.E0)
+                
+        # generates the strategy
+        s = strategy.Strategy(0)
+        strat =  s.generate(self.setup.n-1, 1, 1)# ??+1 for the Fp2 case
         for i in range(self.delay):
-            E, (fP,) = ek[-1].isogeny_forward((fP,))
-            ek.append(E)
+            E, (fQ, fP), _, list_of_curves = E.large_isogeny_forward((fP,), strat, stop=1, with_dual=True)
+            ek[-1][-2:] = [fQ, list_of_curves]
+            ek.append([E, None, None])
             print(E)
-        E = ek.pop()
+        E = ek.pop()[0]
         ek.reverse()
-
         return E, fP, ek
 
     def evaluate(self, Q):
         'Evaluate the VDF at point Q'
-        for E in self.walk_data:
-            (Q,) = E.isogeny_backward(Q)
+        s = strategy.Strategy(0)
+        strat =  s.generate(self.setup.n-2, 1, 1)
+        for (E, kernel, list_of_curves) in self.walk_data:
+            (Q,) = E.large_isogeny_backward(kernel, (Q,), strat, list_of_curves)
         return Q
 
     def verify(self, Q, fQ):
@@ -128,26 +120,33 @@ class VDF_GFp2(VerifiableDelayFunction):
         - P is the image of the generator under the isogeny,
         - data is the evaluation key describing the walk.
         '''
-
-        # Lift the start curve to GF(p²)
-        E = self.setup.E0.to_gfp2()
+        
         
         # start walking
         fP = self.P
-        ek = [E]
+        print(self)
+        E = curve.Curve(self.setup.E0.alpha, self.setup, force_gfp2=True)
+        
+        ek = [[E, None, None]]
+                
+        # generates the strategy
+        s = strategy.Strategy(0)
+        strat =  s.generate(self.setup.n-1, 1, 1)# ??+1 for the Fp2 case
         for i in range(self.delay):
-            E, (fP,) = ek[-1].isogeny_forward((fP,), principal=False)
-            ek.append(E)
+            E, (fQ, fP), _, list_of_curves = E.large_isogeny_forward((fP,), strat, with_dual=True)
+            ek[-1][-2:] = [fQ, list_of_curves]
+            ek.append([E, None, None])
             print(E)
-        E = ek.pop()
+        E = ek.pop()[0]
         ek.reverse()
-
         return E, fP, ek
-
+    
     def evaluate(self, Q):
         'Evaluate the VDF at point Q'
-        for E in self.walk_data:
-            (Q,) = E.isogeny_backward(Q)
+        s = strategy.Strategy(0)
+        strat =  s.generate(self.setup.n-1, 1, 1)
+        for (E, kernel, list_of_curves) in self.walk_data:
+            (Q,) = E.large_isogeny_backward(kernel, (Q,), strat, list_of_curves)
         return Q.trace(self.setup.E0)
 
     def verify(self, Q, fQ):
@@ -159,15 +158,12 @@ class VDF_GFp2(VerifiableDelayFunction):
         EE0 = self.E0_fp2_ws
         PP =   self.P_ws
         fQQ =  fQ.get_coordinates(EE0)
-        e1 = pp.tate(fQQ, PP, self.setup, denominator=True)
-        # it should be fQQ.tate_pairing(PP, self.setup.N, 2)
-        e1bis = pp.tate(2*fQQ, PP, self.setup, denominator=True)
-        
+        e1 = pp.tate(fQQ, PP, self.setup, denominator=False)
+        # The initial curve is defined over Fp
+        # Otherwise, set denominator=True
+                
         EE1 = self.E1_fp2_ws
         fPP =  self.fP_ws
         QQ =  Q.get_coordinates(EE1)
         e2 = pp.tate(fPP, QQ, self.setup, denominator=True)**2
-
-        # on the special initial curve we could set denominator=False
         return e1 != 1 and (e1 == e2 or e1 == 1/e2)
-

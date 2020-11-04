@@ -17,8 +17,6 @@ parser.add_argument("--fp", action='store_const', const="fp", dest='protocol',
                     help="run the GF(p) variant of the vdf (default)")
 parser.add_argument("--fp2", action='store_const', const="fp2", dest='protocol',
                     help="run the GF(p²) variant of the vdf")
-parser.add_argument("--method", type=str, default="kernel4k",
-                    help="choose the method to store the setup walk")
 parser.add_argument("-T", "--nbIterations", type=int, default=12,
                     help="set the number of iterations of the VDF")
 parser.add_argument("--loglevel", type=str, default="INFO",
@@ -32,7 +30,7 @@ if not isinstance(numeric_level, int):
 logging.basicConfig(level=numeric_level, format='%(message)s')
 
 protocol = args.protocol or 'fp'
-method = args.method
+
 try:
     setup = SETUPS[args.setup]
 except KeyError:
@@ -48,7 +46,6 @@ else:
     logging.info('Setup: %s', setup)
     logging.info('N = %r', setup.N)
     logging.info('Protocol: %s', protocol)
-    logging.info('Method: %s', method)
     logging.info('Number of steps: %s\n', str(Delta))
 
     vdfclass = verifiabledelayfunction.VDF_GFp if protocol == 'fp' else verifiabledelayfunction.VDF_GFp2
@@ -58,7 +55,7 @@ else:
     vdf = vdfclass(setup, Delta)
     time = cputime(time)
     logging.info('Total time spent: %.5f s, throughput %.5f isog/ms' % (time, Delta / time / 1000))
-    
+
     Q = vdf.random_input()
 
     logging.info('Evaluating')

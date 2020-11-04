@@ -114,7 +114,7 @@ class Point:
 
         The trace of this point in `image`
         '''
-        assert self.curve.alpha == image.alpha, 'Trace image curve does not match.'
+        assert self.curve.alpha == image.alpha or self.curve.alpha == 1/image.alpha, 'Trace image curve does not match.'
         
         # using affine coordinates, maybe not the best
         x = self.x / self.z
@@ -152,8 +152,9 @@ class Point:
         '''
         return the point on the EllipticCurve object (with y with a sign)
         '''
-        t = self.x**3/self.z + E.a2() * self.x**2 + self.x * self.z
-        return E(self.x, self.curve._sqrt(t), self.z)
+        x, z = self.x, self.z
+        t = x**3/z + E.a2() * x**2 + x * z
+        return E(x, self.curve._sqrt(t), z)
 
     #### Conversion to Weierstrass
     
@@ -164,7 +165,10 @@ class Point:
         OUTPUT:
         * the point on the short Weierstrass curve corresponding to the montgomery curve
         '''
-        E = curve.to_gfp2().weierstrass()
+        if curve.is_on_gfp:
+            E = curve.weierstrass(twist=twist)
+        else :
+            E = curve.to_gfp2().weierstrass(twist=twist)
         if self.is_zero() :
             return E(0)
         if twist :
